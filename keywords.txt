@@ -9,8 +9,8 @@
 SD	KEYWORD1	SD
 File	KEYWORD1	SD
 SDFile	KEYWORD1	SD
-Sd2Card	KEYWORD1	Sd2Card
-SdFatFs	KEYWORD1	SdFatFs
+Sd2Card	KEYWORD1
+SdFatFs	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
