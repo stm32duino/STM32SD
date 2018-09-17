@@ -593,11 +593,9 @@ uint8_t File::isDirectory()
 		{
 			return TRUE;
 		}
-		else
-		{
-			return FALSE;
-		}
 	}
+	// Assume not a directory
+	return FALSE;
 }
 
 File File::openNextFile(uint8_t mode)

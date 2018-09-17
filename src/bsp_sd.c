@@ -269,7 +269,7 @@ uint8_t BSP_SD_IsDetected(void)
   */
 uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint64_t ReadAddr, uint32_t BlockSize, uint32_t NumOfBlocks)
 {
-  if(HAL_SD_ReadBlocks(&uSdHandle, pData, ReadAddr, BlockSize, NumOfBlocks) != SD_OK)
+  if(HAL_SD_ReadBlocks(&uSdHandle, (uint8_t *)pData, ReadAddr, BlockSize, NumOfBlocks) != SD_OK)
   {
     return MSD_ERROR;
   }
@@ -289,7 +289,7 @@ uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint64_t ReadAddr, uint32_t BlockSize
   */
 uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint64_t WriteAddr, uint32_t BlockSize, uint32_t NumOfBlocks)
 {
-  if(HAL_SD_WriteBlocks(&uSdHandle, pData, WriteAddr, BlockSize, NumOfBlocks) != SD_OK)
+  if(HAL_SD_WriteBlocks(&uSdHandle, (uint8_t *)pData, WriteAddr, BlockSize, NumOfBlocks) != SD_OK)
   {
     return MSD_ERROR;
   }
@@ -324,6 +324,8 @@ uint8_t BSP_SD_Erase(uint64_t StartAddr, uint64_t EndAddr)
   */
 __weak void BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params)
 {
+  UNUSED(hsd);
+  UNUSED(Params);
   GPIO_InitTypeDef gpio_init_structure;
 
   /* Enable SDIO clock */
@@ -357,6 +359,8 @@ __weak void BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params)
   */
 __weak void BSP_SD_Detect_MspInit(SD_HandleTypeDef *hsd, void *Params)
 {
+  UNUSED(hsd);
+  UNUSED(Params);
   GPIO_InitTypeDef  gpio_init_structure;
 
   SD_DETECT_GPIO_CLK_ENABLE();
@@ -376,6 +380,8 @@ __weak void BSP_SD_Detect_MspInit(SD_HandleTypeDef *hsd, void *Params)
   */
 __weak void BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params)
 {
+    UNUSED(hsd);
+    UNUSED(Params);
     /* Disable NVIC for SDIO interrupts */
     HAL_NVIC_DisableIRQ(SDIO_IRQn);
 
