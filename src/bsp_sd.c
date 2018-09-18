@@ -127,7 +127,7 @@ static SD_CardInfo uSdCardInfo;
 
 
 /**
-  * @brief  Initializes the SD card device without CS initialization.
+  * @brief  Initializes the SD card device with CS check if any.
   * @retval SD status
   */
 uint8_t BSP_SD_Init(void)
@@ -145,6 +145,15 @@ uint8_t BSP_SD_Init(void)
   uSdHandle.Init.BusWide             = SD_BUS_WIDE_1B;
   uSdHandle.Init.HardwareFlowControl = SD_HW_FLOW_CTRL;
   uSdHandle.Init.ClockDiv            = SD_CLK_DIV;
+
+  if(SD_detect_gpio_pin != GPIO_PIN_All) {
+    /* Msp SD Detect pin initialization */
+    BSP_SD_Detect_MspInit(&uSdHandle, NULL);
+    if(BSP_SD_IsDetected() != SD_PRESENT)   /* Check if SD card is present */
+    {
+      return MSD_ERROR_SD_NOT_PRESENT;
+    }
+  }
 
   /* Msp SD initialization */
   BSP_SD_MspInit(&uSdHandle, NULL);
@@ -176,60 +185,19 @@ uint8_t BSP_SD_Init(void)
 }
 
 /**
-  * @brief  Initializes the SD card device with CS initialization.
+  * @brief  Set the SD card device detect pin and port.
+  * @param  csport one of the gpio port
+  * @param  cspin one of the gpio pin
   * @retval SD status
   */
-uint8_t BSP_SD_CSInit(GPIO_TypeDef *csport, uint32_t cspin)
+uint8_t BSP_SD_CSSet(GPIO_TypeDef *csport, uint32_t cspin)
 {
-  uint8_t sd_state = MSD_OK;
-  SD_detect_gpio_pin = cspin;
-  SD_detect_gpio_port = csport;
-  /* PLLSAI is dedicated to LCD periph. Do not use it to get 48MHz*/
-
-  /* uSD device interface configuration */
-  uSdHandle.Instance = SD_INSTANCE;
-
-  uSdHandle.Init.ClockEdge           = SD_CLK_EDGE;
-  uSdHandle.Init.ClockBypass         = SD_CLK_BYPASS;
-  uSdHandle.Init.ClockPowerSave      = SD_CLK_PWR_SAVE;
-  uSdHandle.Init.BusWide             = SD_BUS_WIDE_1B;
-  uSdHandle.Init.HardwareFlowControl = SD_HW_FLOW_CTRL;
-  uSdHandle.Init.ClockDiv            = SD_CLK_DIV;
-
-  /* Msp SD Detect pin initialization */
-  BSP_SD_Detect_MspInit(&uSdHandle, NULL);
-  if(BSP_SD_IsDetected() != SD_PRESENT)   /* Check if SD card is present */
-  {
-    return MSD_ERROR_SD_NOT_PRESENT;
+  if(csport != 0) {
+    SD_detect_gpio_pin = cspin;
+    SD_detect_gpio_port = csport;
+	return MSD_OK;
   }
-
-  /* Msp SD initialization */
-  BSP_SD_MspInit(&uSdHandle, NULL);
-
-  /* HAL SD initialization */
-#if defined (STM32F4xx) || defined(STM32F7xx) || defined(STM32L4xx)
-  if(HAL_SD_Init(&uSdHandle) != SD_OK)
-#else /* (STM32F1xx) || defined(STM32F2xx) || defined(STM32L1xx) */
-  if(HAL_SD_Init(&uSdHandle, &uSdCardInfo) != SD_OK)
-#endif
-  {
-    sd_state = MSD_ERROR;
-  }
-
-  /* Configure SD Bus width */
-  if(sd_state == MSD_OK)
-  {
-    /* Enable wide operation */
-    if(HAL_SD_WideBusOperation_Config(&uSdHandle, SD_BUS_WIDE_4B) != SD_OK)
-    {
-      sd_state = MSD_ERROR;
-    }
-    else
-    {
-      sd_state = MSD_OK;
-    }
-  }
-  return  sd_state;
+  return MSD_ERROR;
 }
 
 /**

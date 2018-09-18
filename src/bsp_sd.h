@@ -68,10 +68,11 @@
 /* SD Exported Constants */
 #define SD_PRESENT               ((uint8_t)0x01)
 #define SD_NOT_PRESENT           ((uint8_t)0x00)
+#define SD_DETECT_NONE           NUM_DIGITAL_PINS
 
 /* SD Exported Functions */
 uint8_t BSP_SD_Init(void);
-uint8_t BSP_SD_CSInit(GPIO_TypeDef *csport, uint32_t cspin);
+uint8_t BSP_SD_CSSet(GPIO_TypeDef *csport, uint32_t cspin);
 uint8_t BSP_SD_DeInit(void);
 uint8_t BSP_SD_ITConfig(void);
 

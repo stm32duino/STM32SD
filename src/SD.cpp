@@ -59,25 +59,7 @@ SDClass SD;
 
 /**
   * @brief  Link SD, register the file system object to the FatFs mode and configure
-  *         relatives SD IOs except SD Detect Pin
-  * @param  None
-  * @retval TRUE or FALSE
-  */
-uint8_t SDClass::begin()
-{
-	/*##-1- Initializes SD IOs #############################################*/
-	if (_card.init()) {
-		return _fatFs.init();
-    }
-    else
-    {
-	  return FALSE;
-    }
-}
-
-/**
-  * @brief  Link SD, register the file system object to the FatFs mode and configure
-  *         relatives SD IOs including SD Detect Pin
+  *         relatives SD IOs including SD Detect Pin if any
   * @param  None
   * @retval TRUE or FALSE
   */
@@ -87,10 +69,7 @@ uint8_t SDClass::begin(uint32_t cspin)
 	if (_card.init(cspin)) {
 		return _fatFs.init();
     }
-    else
-    {
-	  return FALSE;
-    }
+    return FALSE;
 }
 
 /**
