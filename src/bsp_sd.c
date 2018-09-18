@@ -81,8 +81,42 @@
 /* Includes ------------------------------------------------------------------*/
 #include "bsp_sd.h"
 
+#ifdef SDMMC1
+/* Definition for BSP SD */
+#define SD_INSTANCE            SDMMC1
+#define SD_CLK_ENABLE          __HAL_RCC_SDMMC1_CLK_ENABLE
+#define SD_CLK_DISABLE         __HAL_RCC_SDMMC1_CLK_DISABLE
+#define SD_CLK_EDGE            SDMMC_CLOCK_EDGE_RISING
+#define SD_CLK_BYPASS          SDMMC_CLOCK_BYPASS_DISABLE
+#define SD_CLK_PWR_SAVE        SDMMC_CLOCK_POWER_SAVE_DISABLE
+#define SD_BUS_WIDE_1B         SDMMC_BUS_WIDE_1B
+#define SD_BUS_WIDE_4B         SDMMC_BUS_WIDE_4B
+#define SD_HW_FLOW_CTRL        SDMMC_HARDWARE_FLOW_CONTROL_DISABLE
+#define SD_CLK_DIV             SDMMC_TRANSFER_CLK_DIV
+/* Definition for MSP SD */
+#define SD_AF                  GPIO_AF12_SDMMC1
+#elif defined(SDIO)
+/* Definition for BSP SD */
+#define SD_INSTANCE            SDIO
+#define SD_CLK_ENABLE          __HAL_RCC_SDIO_CLK_ENABLE
+#define SD_CLK_DISABLE         __HAL_RCC_SDIO_CLK_DISABLE
+#define SD_CLK_EDGE            SDIO_CLOCK_EDGE_RISING
+#define SD_CLK_BYPASS          SDIO_CLOCK_BYPASS_DISABLE
+#define SD_CLK_PWR_SAVE        SDIO_CLOCK_POWER_SAVE_DISABLE
+#define SD_BUS_WIDE_1B         SDIO_BUS_WIDE_1B
+#define SD_BUS_WIDE_4B         SDIO_BUS_WIDE_4B
+#define SD_HW_FLOW_CTRL        SDIO_HARDWARE_FLOW_CONTROL_DISABLE
+#define SD_CLK_DIV             SDIO_TRANSFER_CLK_DIV
+/* Definition for MSP SD */
+#define SD_AF                  GPIO_AF12_SDIO
+#else
+#error "Unknown SD_INSTANCE"
+#endif
+
 /* BSP SD Private Variables */
 static SD_HandleTypeDef uSdHandle;
+static uint32_t SD_detect_gpio_pin = GPIO_PIN_All;
+static GPIO_TypeDef *SD_detect_gpio_port = GPIOA;
 #if defined (STM32F4xx) || defined(STM32F7xx) || defined(STM32L4xx)
 #define SD_OK                         HAL_OK
 #define SD_TRANSFER_OK                ((uint8_t)0x00)
@@ -145,10 +179,11 @@ uint8_t BSP_SD_Init(void)
   * @brief  Initializes the SD card device with CS initialization.
   * @retval SD status
   */
-uint8_t BSP_SD_CSInit(void)
+uint8_t BSP_SD_CSInit(GPIO_TypeDef *csport, uint32_t cspin)
 {
   uint8_t sd_state = MSD_OK;
-
+  SD_detect_gpio_pin = cspin;
+  SD_detect_gpio_port = csport;
   /* PLLSAI is dedicated to LCD periph. Do not use it to get 48MHz*/
 
   /* uSD device interface configuration */
@@ -226,20 +261,61 @@ uint8_t BSP_SD_DeInit(void)
   */
 uint8_t BSP_SD_ITConfig(void)
 {
+  uint8_t sd_state = MSD_OK;
   GPIO_InitTypeDef gpio_init_structure;
+  IRQn_Type sd_detect_EXTI_IRQn = EXTI0_IRQn;
 
   /* Configure Interrupt mode for SD detection pin */
-  gpio_init_structure.Pin = SD_DETECT_PIN;
+  gpio_init_structure.Pin = SD_detect_gpio_pin;
   gpio_init_structure.Pull = GPIO_PULLUP;
   gpio_init_structure.Speed = GPIO_SPEED_FAST;
   gpio_init_structure.Mode = GPIO_MODE_IT_RISING_FALLING;
-  HAL_GPIO_Init(SD_DETECT_GPIO_PORT, &gpio_init_structure);
+  HAL_GPIO_Init(SD_detect_gpio_port, &gpio_init_structure);
 
-  /* Enable and set SD detect EXTI Interrupt to the lowest priority */
-  HAL_NVIC_SetPriority((IRQn_Type)(SD_DETECT_EXTI_IRQn), 0x0F, 0x00);
-  HAL_NVIC_EnableIRQ((IRQn_Type)(SD_DETECT_EXTI_IRQn));
-
-  return MSD_OK;
+  if(SD_detect_gpio_pin == GPIO_PIN_0) {
+      sd_detect_EXTI_IRQn = EXTI0_IRQn;
+  } else {
+    if(SD_detect_gpio_pin == GPIO_PIN_1) {
+      sd_detect_EXTI_IRQn = EXTI1_IRQn;
+    } else {
+      if(SD_detect_gpio_pin == GPIO_PIN_2) {
+        sd_detect_EXTI_IRQn = EXTI2_IRQn;
+      } else {
+        if(SD_detect_gpio_pin == GPIO_PIN_3) {
+          sd_detect_EXTI_IRQn = EXTI3_IRQn;
+        } else {
+          if(SD_detect_gpio_pin == GPIO_PIN_4) {
+            sd_detect_EXTI_IRQn = EXTI4_IRQn;
+          } else {
+            if((SD_detect_gpio_pin == GPIO_PIN_5) ||\
+               (SD_detect_gpio_pin == GPIO_PIN_6) ||\
+               (SD_detect_gpio_pin == GPIO_PIN_7) ||\
+               (SD_detect_gpio_pin == GPIO_PIN_8) ||\
+               (SD_detect_gpio_pin == GPIO_PIN_9)) {
+              sd_detect_EXTI_IRQn = EXTI9_5_IRQn;
+            } else {
+              if((SD_detect_gpio_pin == GPIO_PIN_10) ||\
+                 (SD_detect_gpio_pin == GPIO_PIN_11) ||\
+                 (SD_detect_gpio_pin == GPIO_PIN_12) ||\
+                 (SD_detect_gpio_pin == GPIO_PIN_13) ||\
+                 (SD_detect_gpio_pin == GPIO_PIN_14) ||\
+                 (SD_detect_gpio_pin == GPIO_PIN_15)) {
+                sd_detect_EXTI_IRQn = EXTI15_10_IRQn;
+              } else {
+                sd_state = MSD_ERROR;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  if(sd_state == MSD_OK) {
+    /* Enable and set SD detect EXTI Interrupt to the lowest priority */
+    HAL_NVIC_SetPriority(sd_detect_EXTI_IRQn, 0x0F, 0x00);
+    HAL_NVIC_EnableIRQ(sd_detect_EXTI_IRQn);
+  }
+  return sd_state;
 }
 
 /**
@@ -251,7 +327,7 @@ uint8_t BSP_SD_IsDetected(void)
   uint8_t  status = SD_PRESENT;
 
   /* Check SD card detect pin */
-  if (HAL_GPIO_ReadPin(SD_DETECT_GPIO_PORT, SD_DETECT_PIN) == GPIO_PIN_SET)
+  if (HAL_GPIO_ReadPin(SD_detect_gpio_port, SD_detect_gpio_pin) == GPIO_PIN_SET)
   {
     status = SD_NOT_PRESENT;
   }
@@ -363,14 +439,12 @@ __weak void BSP_SD_Detect_MspInit(SD_HandleTypeDef *hsd, void *Params)
   UNUSED(Params);
   GPIO_InitTypeDef  gpio_init_structure;
 
-  SD_DETECT_GPIO_CLK_ENABLE();
-
   /* GPIO configuration in input for uSD_Detect signal */
-  gpio_init_structure.Pin       = SD_DETECT_PIN;
+  gpio_init_structure.Pin       = SD_detect_gpio_pin;
   gpio_init_structure.Mode      = GPIO_MODE_INPUT;
   gpio_init_structure.Pull      = GPIO_PULLUP;
   gpio_init_structure.Speed     = GPIO_SPEED_HIGH;
-  HAL_GPIO_Init(SD_DETECT_GPIO_PORT, &gpio_init_structure);
+  HAL_GPIO_Init(SD_detect_gpio_port, &gpio_init_structure);
 }
 
 /**
@@ -389,7 +463,7 @@ __weak void BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params)
        (by surcharging this __weak function) */
 
     /* Disable SDIO clock */
-    __HAL_RCC_SDIO_CLK_DISABLE();
+    SD_CLK_DISABLE();
 
     /* GPOI pins clock and DMA cloks can be shut down in the applic
        by surcgarging this __weak function */

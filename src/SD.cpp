@@ -81,7 +81,7 @@ uint8_t SDClass::begin()
   * @param  None
   * @retval TRUE or FALSE
   */
-uint8_t SDClass::begin(uint8_t cspin)
+uint8_t SDClass::begin(uint32_t cspin)
 {
 	/*##-1- Initializes SD IOs #############################################*/
 	if (_card.init(cspin)) {

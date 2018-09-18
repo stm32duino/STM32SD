@@ -79,7 +79,7 @@ public:
 
   /* Initialize the SD peripheral */
   uint8_t begin();
-  uint8_t begin(uint8_t cspin);
+  uint8_t begin(uint32_t cspin);
   static File open(const char *filepath, uint8_t mode);
   static File open(const char *filepath);
   static uint8_t exists(const char *filepath);

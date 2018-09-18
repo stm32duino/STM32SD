@@ -44,7 +44,11 @@
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "sd_conf.h"
+#include "variant.h"
+/* Could be redefined in variant.h or using build_opt.h */
+#ifndef SD_DATATIMEOUT
+#define SD_DATATIMEOUT         100000000U
+#endif
 
 /*SD Card information structure */
 #if defined (STM32F4xx) || defined(STM32F7xx) || defined(STM32L4xx)
@@ -67,7 +71,7 @@
 
 /* SD Exported Functions */
 uint8_t BSP_SD_Init(void);
-uint8_t BSP_SD_CSInit(void);
+uint8_t BSP_SD_CSInit(GPIO_TypeDef *csport, uint32_t cspin);
 uint8_t BSP_SD_DeInit(void);
 uint8_t BSP_SD_ITConfig(void);
 
