@@ -68,7 +68,7 @@ public:
 
 
   char *_name = NULL; //file or dir name
-  FIL _fil = {}; // init all fields to 0
+  FIL* _fil = NULL; // underlying file object structure pointer
   DIR _dir = {}; // init all fields to 0
 
 };
