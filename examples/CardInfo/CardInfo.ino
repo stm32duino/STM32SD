@@ -11,6 +11,12 @@
 // include the SD library:
 #include <STM32SD.h>
 
+// If SD card slot has no detect pin then define it as SD_DETECT_NONE
+// to ignore it. One other option is to call 'card.init()' without parameter.
+#ifndef SD_DETECT_PIN
+#define SD_DETECT_PIN SD_DETECT_NONE
+#endif
+
 Sd2Card card;
 SdFatFs fatFs;
 

@@ -37,22 +37,20 @@
 #include <Arduino.h>
 #include "Sd2Card.h"
 
-uint8_t Sd2Card::init(void) {
+uint8_t Sd2Card::init(uint32_t cspin) {
+	if(cspin != SD_DETECT_NONE) {
+		PinName p = digitalPinToPinName(cspin);
+		if((p == NC) ||\
+		   BSP_SD_CSSet(set_GPIO_Port_Clock(STM_PORT(p)),
+						 STM_GPIO_PIN(p)) != MSD_OK) {
+			return FALSE;
+		}
+	}
 	if (BSP_SD_Init() == MSD_OK) {
 		BSP_SD_GetCardInfo(&_SdCardInfo);
 		return TRUE;
-	} else {
-		return FALSE;
 	}
-}
-
-uint8_t Sd2Card::init(uint8_t cspin) {
-	if (BSP_SD_CSInit() == MSD_OK) {
-		BSP_SD_GetCardInfo(&_SdCardInfo);
-		return TRUE;
-	} else {
-		return FALSE;
-	}
+	return FALSE;
 }
 
 uint8_t Sd2Card::type(void) const {

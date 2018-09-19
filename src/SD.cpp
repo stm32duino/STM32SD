@@ -59,38 +59,17 @@ SDClass SD;
 
 /**
   * @brief  Link SD, register the file system object to the FatFs mode and configure
-  *         relatives SD IOs except SD Detect Pin
+  *         relatives SD IOs including SD Detect Pin if any
   * @param  None
   * @retval TRUE or FALSE
   */
-uint8_t SDClass::begin()
-{
-	/*##-1- Initializes SD IOs #############################################*/
-	if (_card.init()) {
-		return _fatFs.init();
-    }
-    else
-    {
-	  return FALSE;
-    }
-}
-
-/**
-  * @brief  Link SD, register the file system object to the FatFs mode and configure
-  *         relatives SD IOs including SD Detect Pin
-  * @param  None
-  * @retval TRUE or FALSE
-  */
-uint8_t SDClass::begin(uint8_t cspin)
+uint8_t SDClass::begin(uint32_t cspin)
 {
 	/*##-1- Initializes SD IOs #############################################*/
 	if (_card.init(cspin)) {
 		return _fatFs.init();
     }
-    else
-    {
-	  return FALSE;
-    }
+    return FALSE;
 }
 
 /**
@@ -593,11 +572,9 @@ uint8_t File::isDirectory()
 		{
 			return TRUE;
 		}
-		else
-		{
-			return FALSE;
-		}
 	}
+	// Assume not a directory
+	return FALSE;
 }
 
 File File::openNextFile(uint8_t mode)
