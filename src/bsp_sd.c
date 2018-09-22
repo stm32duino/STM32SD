@@ -91,7 +91,9 @@
 #define SD_CLK_PWR_SAVE        SDMMC_CLOCK_POWER_SAVE_DISABLE
 #define SD_BUS_WIDE_1B         SDMMC_BUS_WIDE_1B
 #define SD_BUS_WIDE_4B         SDMMC_BUS_WIDE_4B
+#ifndef SD_HW_FLOW_CTRL
 #define SD_HW_FLOW_CTRL        SDMMC_HARDWARE_FLOW_CONTROL_DISABLE
+#endif
 #define SD_CLK_DIV             SDMMC_TRANSFER_CLK_DIV
 /* Definition for MSP SD */
 #define SD_AF                  GPIO_AF12_SDMMC1
@@ -105,7 +107,9 @@
 #define SD_CLK_PWR_SAVE        SDIO_CLOCK_POWER_SAVE_DISABLE
 #define SD_BUS_WIDE_1B         SDIO_BUS_WIDE_1B
 #define SD_BUS_WIDE_4B         SDIO_BUS_WIDE_4B
+#ifndef SD_HW_FLOW_CTRL
 #define SD_HW_FLOW_CTRL        SDIO_HARDWARE_FLOW_CONTROL_DISABLE
+#endif
 #define SD_CLK_DIV             SDIO_TRANSFER_CLK_DIV
 /* Definition for MSP SD */
 #define SD_AF                  GPIO_AF12_SDIO
