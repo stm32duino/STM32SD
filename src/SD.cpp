@@ -186,7 +186,11 @@ File SDClass::openRoot(void)
 
 	if(f_opendir(&file._dir, _fatFs.getRoot()) != FR_OK)
 	{
+#if _FATFS == 68300
+		file._dir.obj.fs = 0;
+#else
 		file._dir.fs = 0;
+#endif
 	}
     return file;
 }
@@ -196,8 +200,13 @@ File::File()
 	_name = NULL;
 	_fil = (FIL*)malloc(sizeof(FIL));
 	assert(_fil != NULL );
+#if _FATFS == 68300
+	_fil->obj.fs = 0;
+	_dir.obj.fs = 0;
+#else
 	_fil->fs = 0;
 	_dir.fs = 0;
+#endif
 }
 
 File::File(const char* name)
@@ -207,8 +216,13 @@ File::File(const char* name)
 	sprintf(_name, "%s", name);
     _fil = (FIL*)malloc(sizeof(FIL));
 	assert(_fil != NULL );
+#if _FATFS == 68300
+	_fil->obj.fs = 0;
+	_dir.obj.fs = 0;
+#else
 	_fil->fs = 0;
 	_dir.fs = 0;
+#endif
 }
 
 /** List directory contents to Serial.
@@ -230,9 +244,13 @@ void File::ls(uint8_t flags, uint8_t indent) {
   char *fn;
 
 #if _USE_LFN
+#if _FATFS == 68300
+  /* altname */
+#else
   static char lfn[_MAX_LFN];
   fno.lfname = lfn;
   fno.lfsize = sizeof(lfn);
+#endif
 #endif
 
   while(1)
@@ -246,7 +264,7 @@ void File::ls(uint8_t flags, uint8_t indent) {
     {
       continue;
     }
-#if _USE_LFN
+#if _USE_LFN && _FATFS != 68300
     fn = *fno.lfname ? fno.lfname : fno.fname;
 #else
     fn = fno.fname;
@@ -377,7 +395,11 @@ void File::close()
 {
 	if(_name)
 	{
+#if _FATFS == 68300
+		if(_fil && _fil->obj.fs != 0) {
+#else
 		if(_fil && _fil->fs != 0) {
+#endif
 			/* Flush the file before close */
 			f_sync(_fil);
 
@@ -386,7 +408,11 @@ void File::close()
             free(_fil);
 		}
 
+#if _FATFS == 68300
+		if(_dir.obj.fs != 0) {
+#else
 		if(_dir.fs != 0) {
+#endif
 			f_closedir(&_dir);
 		}
 
@@ -468,7 +494,11 @@ uint32_t File::size()
 }
 
 File::operator bool() {
+#if _FATFS == 68300
+  return  ((_name == NULL) || ((_fil == NULL) && (_dir.obj.fs == 0)) || ((_fil != NULL) && (_fil->obj.fs == 0) && (_dir.obj.fs == 0))) ? FALSE : TRUE;
+#else
   return  ((_name == NULL) || ((_fil == NULL) && (_dir.fs == 0)) || ((_fil != NULL) && (_fil->fs == 0) && (_dir.fs == 0))) ? FALSE : TRUE;
+#endif
 }
 /**
   * @brief  Write data to the file
@@ -566,9 +596,17 @@ uint8_t File::isDirectory()
 {
     FILINFO fno;
 	assert(_name  != NULL );
-	if (_dir.fs != 0)
+#if _FATFS == 68300
+	if(_dir.obj.fs != 0)
+#else
+	if(_dir.fs != 0)
+#endif
 		return TRUE;
+#if _FATFS == 68300
+	else if (_fil->obj.fs != 0)
+#else
 	else if (_fil->fs != 0)
+#endif
 		return FALSE;
 	// if not init get info
 	if (f_stat(_name, &fno) == FR_OK)
@@ -590,7 +628,7 @@ File File::openNextFile(uint8_t mode)
   char *fullPath = NULL;
   size_t name_len= strlen(_name);
   size_t len = name_len;
-#if _USE_LFN
+#if _USE_LFN && _FATFS != 68300
   static char lfn[_MAX_LFN];
   fno.lfname = lfn;
   fno.lfsize = sizeof(lfn);
@@ -606,7 +644,7 @@ File File::openNextFile(uint8_t mode)
     {
       continue;
     }
-#if _USE_LFN
+#if _USE_LFN && _FATFS != 68300
     fn = *fno.lfname ? fno.lfname : fno.fname;
 #else
     fn = fno.fname;
@@ -634,7 +672,11 @@ void File::rewindDirectory(void)
 {
 	if(isDirectory())
 	{
+#if _FATFS == 68300
+		if(_dir.obj.fs != 0) {
+#else
 		if(_dir.fs != 0) {
+#endif
 			f_closedir(&_dir);
 		}
 		f_opendir(&_dir, _name);
