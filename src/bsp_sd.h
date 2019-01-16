@@ -75,9 +75,13 @@ uint8_t BSP_SD_Init(void);
 uint8_t BSP_SD_CSSet(GPIO_TypeDef *csport, uint32_t cspin);
 uint8_t BSP_SD_DeInit(void);
 uint8_t BSP_SD_ITConfig(void);
-
+#ifndef STM32L1xx
+uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint32_t ReadAddr, uint32_t NumOfBlocks, uint32_t Timeout);
+uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint32_t WriteAddr, uint32_t NumOfBlocks, uint32_t Timeout);
+#else
 uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint64_t ReadAddr, uint32_t BlockSize, uint32_t NumOfBlocks);
 uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint64_t WriteAddr, uint32_t BlockSize, uint32_t NumOfBlocks);
+#endif
 uint8_t BSP_SD_Erase(uint64_t StartAddr, uint64_t EndAddr);
 #ifndef STM32L1xx
 uint8_t BSP_SD_GetCardState(void);
