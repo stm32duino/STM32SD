@@ -321,6 +321,47 @@ uint8_t BSP_SD_IsDetected(void)
   return status;
 }
 
+#ifndef STM32L1xx
+/**
+  * @brief  Reads block(s) from a specified address in an SD card, in polling mode.
+  * @param  pData: Pointer to the buffer that will contain the data to transmit
+  * @param  ReadAddr: Address from where data is to be read
+  * @param  NumOfBlocks: Number of SD blocks to read
+  * @param  Timeout: Timeout for read operation
+  * @retval SD status
+  */
+uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint32_t ReadAddr, uint32_t NumOfBlocks, uint32_t Timeout)
+{
+  if(HAL_SD_ReadBlocks(&uSdHandle, (uint8_t *)pData, ReadAddr, NumOfBlocks, Timeout) != HAL_OK)
+  {
+    return MSD_ERROR;
+  }
+  else
+  {
+    return MSD_OK;
+  }
+}
+
+/**
+  * @brief  Writes block(s) to a specified address in an SD card, in polling mode. 
+  * @param  pData: Pointer to the buffer that will contain the data to transmit
+  * @param  WriteAddr: Address from where data is to be written
+  * @param  NumOfBlocks: Number of SD blocks to write
+  * @param  Timeout: Timeout for write operation
+  * @retval SD status
+  */
+uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint32_t WriteAddr, uint32_t NumOfBlocks, uint32_t Timeout)
+{
+  if(HAL_SD_WriteBlocks(&uSdHandle, (uint8_t *)pData, WriteAddr, NumOfBlocks, Timeout) != HAL_OK)
+  {
+    return MSD_ERROR;
+  }
+  else
+  {
+    return MSD_OK;
+  }
+}
+#else /* STM32L1xx */
 /**
   * @brief  Reads block(s) from a specified address in an SD card, in polling mode.
   * @param  pData: Pointer to the buffer that will contain the data to transmit
@@ -360,6 +401,7 @@ uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint64_t WriteAddr, uint32_t BlockSi
     return MSD_OK;
   }
 }
+#endif /* !STM32L1xx */
 
 /**
   * @brief  Erases the specified memory area of the given SD card.
