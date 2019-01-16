@@ -51,7 +51,7 @@
 #endif
 
 /*SD Card information structure */
-#if defined (STM32F4xx) || defined(STM32F7xx) || defined(STM32L4xx)
+#ifndef STM32L1xx
 #define HAL_SD_CardInfoTypedef         HAL_SD_CardInfoTypeDef
 #define BSP_SD_CardInfo                HAL_SD_CardInfoTypeDef
 #define HAL_SD_WideBusOperation_Config HAL_SD_ConfigWideBusOperation
@@ -79,9 +79,9 @@ uint8_t BSP_SD_ITConfig(void);
 uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint64_t ReadAddr, uint32_t BlockSize, uint32_t NumOfBlocks);
 uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint64_t WriteAddr, uint32_t BlockSize, uint32_t NumOfBlocks);
 uint8_t BSP_SD_Erase(uint64_t StartAddr, uint64_t EndAddr);
-#if defined (STM32F4xx) || defined(STM32F7xx) || defined(STM32L4xx)
+#ifndef STM32L1xx
 uint8_t BSP_SD_GetCardState(void);
-#else /* (STM32F1xx) || defined(STM32F2xx) || defined(STM32L1xx) */
+#else /* STM32L1xx */
 HAL_SD_TransferStateTypedef BSP_SD_GetStatus(void);
 #endif
 void    BSP_SD_GetCardInfo(HAL_SD_CardInfoTypedef *CardInfo);
