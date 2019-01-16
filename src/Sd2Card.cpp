@@ -55,7 +55,7 @@ uint8_t Sd2Card::init(uint32_t cspin) {
 
 uint8_t Sd2Card::type(void) const {
   uint8_t cardType = SD_CARD_TYPE_UKN;
-#if defined (STM32F4xx) || defined(STM32F7xx) || defined(STM32L4xx)
+#ifndef STM32L1xx
   switch (_SdCardInfo.CardType) {
     case CARD_SDSC:
       switch (_SdCardInfo.CardVersion) {
@@ -78,7 +78,7 @@ uint8_t Sd2Card::type(void) const {
     default:
       cardType = SD_CARD_TYPE_UKN;
   }
-#else /* (STM32F1xx) || defined(STM32F2xx) || defined(STM32L1xx) */
+#else /* STM32L1xx */
   switch (_SdCardInfo.CardType) {
     case STD_CAPACITY_SD_CARD_V1_1:
       cardType = SD_CARD_TYPE_SD1;

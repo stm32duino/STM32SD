@@ -94,7 +94,11 @@
 #ifndef SD_HW_FLOW_CTRL
 #define SD_HW_FLOW_CTRL        SDMMC_HARDWARE_FLOW_CONTROL_DISABLE
 #endif
+#ifdef STM32H7xx
+#define SD_CLK_DIV             1
+#else
 #define SD_CLK_DIV             SDMMC_TRANSFER_CLK_DIV
+#endif
 /* Definition for MSP SD */
 #define SD_AF                  GPIO_AF12_SDMMC1
 #elif defined(SDIO)
@@ -112,20 +116,28 @@
 #endif
 #define SD_CLK_DIV             SDIO_TRANSFER_CLK_DIV
 /* Definition for MSP SD */
+#ifndef STM32F1xx
 #define SD_AF                  GPIO_AF12_SDIO
+#endif
 #else
 #error "Unknown SD_INSTANCE"
+#endif
+
+#ifdef GPIO_SPEED_FREQ_VERY_HIGH
+#define SD_GPIO_SPEED  GPIO_SPEED_FREQ_VERY_HIGH
+#else
+#define SD_GPIO_SPEED  GPIO_SPEED_FREQ_HIGH
 #endif
 
 /* BSP SD Private Variables */
 static SD_HandleTypeDef uSdHandle;
 static uint32_t SD_detect_gpio_pin = GPIO_PIN_All;
 static GPIO_TypeDef *SD_detect_gpio_port = GPIOA;
-#if defined (STM32F4xx) || defined(STM32F7xx) || defined(STM32L4xx)
+#ifndef STM32L1xx
 #define SD_OK                         HAL_OK
 #define SD_TRANSFER_OK                ((uint8_t)0x00)
 #define SD_TRANSFER_BUSY              ((uint8_t)0x01)
-#else /* (STM32F1xx) || defined(STM32F2xx) || defined(STM32L1xx) */
+#else /* STM32L1xx */
 static SD_CardInfo uSdCardInfo;
 #endif
 
@@ -144,7 +156,9 @@ uint8_t BSP_SD_Init(void)
   uSdHandle.Instance = SD_INSTANCE;
 
   uSdHandle.Init.ClockEdge           = SD_CLK_EDGE;
+#ifndef STM32H7xx
   uSdHandle.Init.ClockBypass         = SD_CLK_BYPASS;
+#endif
   uSdHandle.Init.ClockPowerSave      = SD_CLK_PWR_SAVE;
   uSdHandle.Init.BusWide             = SD_BUS_WIDE_1B;
   uSdHandle.Init.HardwareFlowControl = SD_HW_FLOW_CTRL;
@@ -163,9 +177,9 @@ uint8_t BSP_SD_Init(void)
   BSP_SD_MspInit(&uSdHandle, NULL);
 
   /* HAL SD initialization */
-#if defined (STM32F4xx) || defined(STM32F7xx) || defined(STM32L4xx)
+#ifndef STM32L1xx
   if(HAL_SD_Init(&uSdHandle) != SD_OK)
-#else /* (STM32F1xx) || defined(STM32F2xx) || defined(STM32L1xx) */
+#else /* STM32L1xx */
   if(HAL_SD_Init(&uSdHandle, &uSdCardInfo) != SD_OK)
 #endif
   {
@@ -240,7 +254,7 @@ uint8_t BSP_SD_ITConfig(void)
   /* Configure Interrupt mode for SD detection pin */
   gpio_init_structure.Pin = SD_detect_gpio_pin;
   gpio_init_structure.Pull = GPIO_PULLUP;
-  gpio_init_structure.Speed = GPIO_SPEED_FAST;
+  gpio_init_structure.Speed = SD_GPIO_SPEED;
   gpio_init_structure.Mode = GPIO_MODE_IT_RISING_FALLING;
   HAL_GPIO_Init(SD_detect_gpio_port, &gpio_init_structure);
 
@@ -304,7 +318,7 @@ uint8_t BSP_SD_IsDetected(void)
     status = SD_NOT_PRESENT;
   }
 
-    return status;
+  return status;
 }
 
 /**
@@ -386,9 +400,10 @@ __weak void BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params)
   /* Common GPIO configuration */
   gpio_init_structure.Mode      = GPIO_MODE_AF_PP;
   gpio_init_structure.Pull      = GPIO_PULLUP;
-  gpio_init_structure.Speed     = GPIO_SPEED_HIGH;
+  gpio_init_structure.Speed     = SD_GPIO_SPEED;
+#ifndef STM32F1xx
   gpio_init_structure.Alternate = SD_AF;
-
+#endif
   /* GPIOC configuration */
   gpio_init_structure.Pin = GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12;
 
@@ -415,7 +430,7 @@ __weak void BSP_SD_Detect_MspInit(SD_HandleTypeDef *hsd, void *Params)
   gpio_init_structure.Pin       = SD_detect_gpio_pin;
   gpio_init_structure.Mode      = GPIO_MODE_INPUT;
   gpio_init_structure.Pull      = GPIO_PULLUP;
-  gpio_init_structure.Speed     = GPIO_SPEED_HIGH;
+  gpio_init_structure.Speed     = SD_GPIO_SPEED;
   HAL_GPIO_Init(SD_detect_gpio_port, &gpio_init_structure);
 }
 
@@ -428,8 +443,6 @@ __weak void BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params)
 {
     UNUSED(hsd);
     UNUSED(Params);
-    /* Disable NVIC for SDIO interrupts */
-    HAL_NVIC_DisableIRQ(SDIO_IRQn);
 
     /* DeInit GPIO pins can be done in the application
        (by surcharging this __weak function) */
@@ -441,7 +454,7 @@ __weak void BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params)
        by surcgarging this __weak function */
 }
 
-#if defined (STM32F4xx) || defined(STM32F7xx) || defined(STM32L4xx)
+#ifndef STM32L1xx
 /**
   * @brief  Gets the current SD card data status.
   * @retval Data transfer state.
@@ -453,7 +466,7 @@ uint8_t BSP_SD_GetCardState(void)
 {
   return((HAL_SD_GetCardState(&uSdHandle) == HAL_SD_CARD_TRANSFER ) ? SD_TRANSFER_OK : SD_TRANSFER_BUSY);
 }
-#else /* (STM32F1xx) || defined(STM32F2xx) || defined(STM32L1xx) */
+#else /* STM32L1xx */
 /**
   * @brief  Gets the current SD card data status.
   * @retval Data transfer state.
