@@ -280,7 +280,7 @@ void File::ls(uint8_t flags, uint8_t indent)
           sprintf(fullPath, "%s/%s", _name, fn);
           File filtmp = SD.open(fullPath);
 
-          if (filtmp._name != NULL) {
+          if (filtmp) {
             Serial.println();
             filtmp.ls(flags, indent + 2);
             filtmp.close();
@@ -391,6 +391,7 @@ void File::close()
         f_close(_fil);
       }
       free(_fil);
+      _fil = NULL;
     }
 
 #if _FATFS == 68300
@@ -402,6 +403,7 @@ void File::close()
     }
 
     free(_name);
+    _name = NULL;
   }
 }
 
