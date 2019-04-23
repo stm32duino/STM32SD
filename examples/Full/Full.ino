@@ -157,13 +157,14 @@ void setup()
   }
 
   /* Test isDirectory() method */
-  MyFile = File("STM32");
+  MyFile = SD.open("STM32");
   if (MyFile) {
     Serial.print("Is 'STM32' is a dir: ");
     if (MyFile.isDirectory())
       Serial.println("OK");
     else
       Serial.println("KO");
+    MyFile.close();
   } else {
     Serial.println("Error to open 'STM32' dir");
   }
