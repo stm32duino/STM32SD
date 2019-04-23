@@ -378,15 +378,18 @@ void File::close()
 {
   if (_name) {
 #if _FATFS == 68300
-    if (_fil && _fil->obj.fs != 0) {
+    if (_fil) {
+      if (_fil->obj.fs != 0) {
 #else
-    if (_fil && _fil->fs != 0) {
+    if (_fil) {
+      if (_fil->fs != 0) {
 #endif
-      /* Flush the file before close */
-      f_sync(_fil);
+        /* Flush the file before close */
+        f_sync(_fil);
 
-      /* Close the file */
-      f_close(_fil);
+        /* Close the file */
+        f_close(_fil);
+      }
       free(_fil);
     }
 
