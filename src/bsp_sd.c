@@ -1,40 +1,40 @@
-  /**
-  ******************************************************************************
-  * @file    bsp_sd.c
-  * @author  MCD Application Team
-  * @version V1.0.0
-  * @date    10-June-2016
-  * @brief   This file includes the uSD card driver mounted on stm32
-  *          board.
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; COPYRIGHT(c) 2016 STMicroelectronics</center></h2>
-  *
-  * Redistribution and use in source and binary forms, with or without modification,
-  * are permitted provided that the following conditions are met:
-  *   1. Redistributions of source code must retain the above copyright notice,
-  *      this list of conditions and the following disclaimer.
-  *   2. Redistributions in binary form must reproduce the above copyright notice,
-  *      this list of conditions and the following disclaimer in the documentation
-  *      and/or other materials provided with the distribution.
-  *   3. Neither the name of STMicroelectronics nor the names of its contributors
-  *      may be used to endorse or promote products derived from this software
-  *      without specific prior written permission.
-  *
-  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
-  ******************************************************************************
-  */
+/**
+******************************************************************************
+* @file    bsp_sd.c
+* @author  MCD Application Team
+* @version V1.0.0
+* @date    10-June-2016
+* @brief   This file includes the uSD card driver mounted on stm32
+*          board.
+******************************************************************************
+* @attention
+*
+* <h2><center>&copy; COPYRIGHT(c) 2016 STMicroelectronics</center></h2>
+*
+* Redistribution and use in source and binary forms, with or without modification,
+* are permitted provided that the following conditions are met:
+*   1. Redistributions of source code must retain the above copyright notice,
+*      this list of conditions and the following disclaimer.
+*   2. Redistributions in binary form must reproduce the above copyright notice,
+*      this list of conditions and the following disclaimer in the documentation
+*      and/or other materials provided with the distribution.
+*   3. Neither the name of STMicroelectronics nor the names of its contributors
+*      may be used to endorse or promote products derived from this software
+*      without specific prior written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+* DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+* FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+* DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+* SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*
+******************************************************************************
+*/
 
 /* File Info : -----------------------------------------------------------------
                                    User NOTES
@@ -164,11 +164,10 @@ uint8_t BSP_SD_Init(void)
   uSdHandle.Init.HardwareFlowControl = SD_HW_FLOW_CTRL;
   uSdHandle.Init.ClockDiv            = SD_CLK_DIV;
 
-  if(SD_detect_gpio_pin != GPIO_PIN_All) {
+  if (SD_detect_gpio_pin != GPIO_PIN_All) {
     /* Msp SD Detect pin initialization */
     BSP_SD_Detect_MspInit(&uSdHandle, NULL);
-    if(BSP_SD_IsDetected() != SD_PRESENT)   /* Check if SD card is present */
-    {
+    if (BSP_SD_IsDetected() != SD_PRESENT) { /* Check if SD card is present */
       return MSD_ERROR_SD_NOT_PRESENT;
     }
   }
@@ -178,24 +177,20 @@ uint8_t BSP_SD_Init(void)
 
   /* HAL SD initialization */
 #ifndef STM32L1xx
-  if(HAL_SD_Init(&uSdHandle) != SD_OK)
+  if (HAL_SD_Init(&uSdHandle) != SD_OK)
 #else /* STM32L1xx */
-  if(HAL_SD_Init(&uSdHandle, &uSdCardInfo) != SD_OK)
+  if (HAL_SD_Init(&uSdHandle, &uSdCardInfo) != SD_OK)
 #endif
   {
     sd_state = MSD_ERROR;
   }
 
   /* Configure SD Bus width */
-  if(sd_state == MSD_OK)
-  {
+  if (sd_state == MSD_OK) {
     /* Enable wide operation */
-    if(HAL_SD_WideBusOperation_Config(&uSdHandle, SD_BUS_WIDE_4B) != SD_OK)
-    {
+    if (HAL_SD_WideBusOperation_Config(&uSdHandle, SD_BUS_WIDE_4B) != SD_OK) {
       sd_state = MSD_ERROR;
-    }
-    else
-    {
+    } else {
       sd_state = MSD_OK;
     }
   }
@@ -210,10 +205,10 @@ uint8_t BSP_SD_Init(void)
   */
 uint8_t BSP_SD_CSSet(GPIO_TypeDef *csport, uint32_t cspin)
 {
-  if(csport != 0) {
+  if (csport != 0) {
     SD_detect_gpio_pin = cspin;
     SD_detect_gpio_port = csport;
-	return MSD_OK;
+    return MSD_OK;
   }
   return MSD_ERROR;
 }
@@ -229,8 +224,7 @@ uint8_t BSP_SD_DeInit(void)
   uSdHandle.Instance = SD_INSTANCE;
 
   /* HAL SD deinitialization */
-  if(HAL_SD_DeInit(&uSdHandle) != HAL_OK)
-  {
+  if (HAL_SD_DeInit(&uSdHandle) != HAL_OK) {
     sd_state = MSD_ERROR;
   }
 
@@ -258,34 +252,34 @@ uint8_t BSP_SD_ITConfig(void)
   gpio_init_structure.Mode = GPIO_MODE_IT_RISING_FALLING;
   HAL_GPIO_Init(SD_detect_gpio_port, &gpio_init_structure);
 
-  if(SD_detect_gpio_pin == GPIO_PIN_0) {
-      sd_detect_EXTI_IRQn = EXTI0_IRQn;
+  if (SD_detect_gpio_pin == GPIO_PIN_0) {
+    sd_detect_EXTI_IRQn = EXTI0_IRQn;
   } else {
-    if(SD_detect_gpio_pin == GPIO_PIN_1) {
+    if (SD_detect_gpio_pin == GPIO_PIN_1) {
       sd_detect_EXTI_IRQn = EXTI1_IRQn;
     } else {
-      if(SD_detect_gpio_pin == GPIO_PIN_2) {
+      if (SD_detect_gpio_pin == GPIO_PIN_2) {
         sd_detect_EXTI_IRQn = EXTI2_IRQn;
       } else {
-        if(SD_detect_gpio_pin == GPIO_PIN_3) {
+        if (SD_detect_gpio_pin == GPIO_PIN_3) {
           sd_detect_EXTI_IRQn = EXTI3_IRQn;
         } else {
-          if(SD_detect_gpio_pin == GPIO_PIN_4) {
+          if (SD_detect_gpio_pin == GPIO_PIN_4) {
             sd_detect_EXTI_IRQn = EXTI4_IRQn;
           } else {
-            if((SD_detect_gpio_pin == GPIO_PIN_5) ||\
-               (SD_detect_gpio_pin == GPIO_PIN_6) ||\
-               (SD_detect_gpio_pin == GPIO_PIN_7) ||\
-               (SD_detect_gpio_pin == GPIO_PIN_8) ||\
-               (SD_detect_gpio_pin == GPIO_PIN_9)) {
+            if ((SD_detect_gpio_pin == GPIO_PIN_5) || \
+                (SD_detect_gpio_pin == GPIO_PIN_6) || \
+                (SD_detect_gpio_pin == GPIO_PIN_7) || \
+                (SD_detect_gpio_pin == GPIO_PIN_8) || \
+                (SD_detect_gpio_pin == GPIO_PIN_9)) {
               sd_detect_EXTI_IRQn = EXTI9_5_IRQn;
             } else {
-              if((SD_detect_gpio_pin == GPIO_PIN_10) ||\
-                 (SD_detect_gpio_pin == GPIO_PIN_11) ||\
-                 (SD_detect_gpio_pin == GPIO_PIN_12) ||\
-                 (SD_detect_gpio_pin == GPIO_PIN_13) ||\
-                 (SD_detect_gpio_pin == GPIO_PIN_14) ||\
-                 (SD_detect_gpio_pin == GPIO_PIN_15)) {
+              if ((SD_detect_gpio_pin == GPIO_PIN_10) || \
+                  (SD_detect_gpio_pin == GPIO_PIN_11) || \
+                  (SD_detect_gpio_pin == GPIO_PIN_12) || \
+                  (SD_detect_gpio_pin == GPIO_PIN_13) || \
+                  (SD_detect_gpio_pin == GPIO_PIN_14) || \
+                  (SD_detect_gpio_pin == GPIO_PIN_15)) {
                 sd_detect_EXTI_IRQn = EXTI15_10_IRQn;
               } else {
                 sd_state = MSD_ERROR;
@@ -296,7 +290,7 @@ uint8_t BSP_SD_ITConfig(void)
       }
     }
   }
-  if(sd_state == MSD_OK) {
+  if (sd_state == MSD_OK) {
     /* Enable and set SD detect EXTI Interrupt to the lowest priority */
     HAL_NVIC_SetPriority(sd_detect_EXTI_IRQn, 0x0F, 0x00);
     HAL_NVIC_EnableIRQ(sd_detect_EXTI_IRQn);
@@ -313,8 +307,7 @@ uint8_t BSP_SD_IsDetected(void)
   uint8_t  status = SD_PRESENT;
 
   /* Check SD card detect pin */
-  if (HAL_GPIO_ReadPin(SD_detect_gpio_port, SD_detect_gpio_pin) == GPIO_PIN_SET)
-  {
+  if (HAL_GPIO_ReadPin(SD_detect_gpio_port, SD_detect_gpio_pin) == GPIO_PIN_SET) {
     status = SD_NOT_PRESENT;
   }
 
@@ -332,18 +325,15 @@ uint8_t BSP_SD_IsDetected(void)
   */
 uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint32_t ReadAddr, uint32_t NumOfBlocks, uint32_t Timeout)
 {
-  if(HAL_SD_ReadBlocks(&uSdHandle, (uint8_t *)pData, ReadAddr, NumOfBlocks, Timeout) != HAL_OK)
-  {
+  if (HAL_SD_ReadBlocks(&uSdHandle, (uint8_t *)pData, ReadAddr, NumOfBlocks, Timeout) != HAL_OK) {
     return MSD_ERROR;
-  }
-  else
-  {
+  } else {
     return MSD_OK;
   }
 }
 
 /**
-  * @brief  Writes block(s) to a specified address in an SD card, in polling mode. 
+  * @brief  Writes block(s) to a specified address in an SD card, in polling mode.
   * @param  pData: Pointer to the buffer that will contain the data to transmit
   * @param  WriteAddr: Address from where data is to be written
   * @param  NumOfBlocks: Number of SD blocks to write
@@ -352,12 +342,9 @@ uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint32_t ReadAddr, uint32_t NumOfBloc
   */
 uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint32_t WriteAddr, uint32_t NumOfBlocks, uint32_t Timeout)
 {
-  if(HAL_SD_WriteBlocks(&uSdHandle, (uint8_t *)pData, WriteAddr, NumOfBlocks, Timeout) != HAL_OK)
-  {
+  if (HAL_SD_WriteBlocks(&uSdHandle, (uint8_t *)pData, WriteAddr, NumOfBlocks, Timeout) != HAL_OK) {
     return MSD_ERROR;
-  }
-  else
-  {
+  } else {
     return MSD_OK;
   }
 }
@@ -372,12 +359,9 @@ uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint32_t WriteAddr, uint32_t NumOfBl
   */
 uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint64_t ReadAddr, uint32_t BlockSize, uint32_t NumOfBlocks)
 {
-  if(HAL_SD_ReadBlocks(&uSdHandle, (uint8_t *)pData, ReadAddr, BlockSize, NumOfBlocks) != SD_OK)
-  {
+  if (HAL_SD_ReadBlocks(&uSdHandle, (uint8_t *)pData, ReadAddr, BlockSize, NumOfBlocks) != SD_OK) {
     return MSD_ERROR;
-  }
-  else
-  {
+  } else {
     return MSD_OK;
   }
 }
@@ -392,12 +376,9 @@ uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint64_t ReadAddr, uint32_t BlockSize
   */
 uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint64_t WriteAddr, uint32_t BlockSize, uint32_t NumOfBlocks)
 {
-  if(HAL_SD_WriteBlocks(&uSdHandle, (uint8_t *)pData, WriteAddr, BlockSize, NumOfBlocks) != SD_OK)
-  {
+  if (HAL_SD_WriteBlocks(&uSdHandle, (uint8_t *)pData, WriteAddr, BlockSize, NumOfBlocks) != SD_OK) {
     return MSD_ERROR;
-  }
-  else
-  {
+  } else {
     return MSD_OK;
   }
 }
@@ -411,12 +392,9 @@ uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint64_t WriteAddr, uint32_t BlockSi
   */
 uint8_t BSP_SD_Erase(uint64_t StartAddr, uint64_t EndAddr)
 {
-  if(HAL_SD_Erase(&uSdHandle, StartAddr, EndAddr) != SD_OK)
-  {
+  if (HAL_SD_Erase(&uSdHandle, StartAddr, EndAddr) != SD_OK) {
     return MSD_ERROR;
-  }
-  else
-  {
+  } else {
     return MSD_OK;
   }
 }
@@ -483,17 +461,17 @@ __weak void BSP_SD_Detect_MspInit(SD_HandleTypeDef *hsd, void *Params)
   */
 __weak void BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params)
 {
-    UNUSED(hsd);
-    UNUSED(Params);
+  UNUSED(hsd);
+  UNUSED(Params);
 
-    /* DeInit GPIO pins can be done in the application
-       (by surcharging this __weak function) */
+  /* DeInit GPIO pins can be done in the application
+     (by surcharging this __weak function) */
 
-    /* Disable SDIO clock */
-    SD_CLK_DISABLE();
+  /* Disable SDIO clock */
+  SD_CLK_DISABLE();
 
-    /* GPOI pins clock and DMA cloks can be shut down in the applic
-       by surcgarging this __weak function */
+  /* GPOI pins clock and DMA cloks can be shut down in the applic
+     by surcgarging this __weak function */
 }
 
 #ifndef STM32L1xx
@@ -506,7 +484,7 @@ __weak void BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params)
   */
 uint8_t BSP_SD_GetCardState(void)
 {
-  return((HAL_SD_GetCardState(&uSdHandle) == HAL_SD_CARD_TRANSFER ) ? SD_TRANSFER_OK : SD_TRANSFER_BUSY);
+  return ((HAL_SD_GetCardState(&uSdHandle) == HAL_SD_CARD_TRANSFER) ? SD_TRANSFER_OK : SD_TRANSFER_BUSY);
 }
 #else /* STM32L1xx */
 /**
@@ -519,7 +497,7 @@ uint8_t BSP_SD_GetCardState(void)
   */
 HAL_SD_TransferStateTypedef BSP_SD_GetStatus(void)
 {
-  return(HAL_SD_GetStatus(&uSdHandle));
+  return (HAL_SD_GetStatus(&uSdHandle));
 }
 #endif
 

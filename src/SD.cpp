@@ -48,10 +48,10 @@
  */
 
 extern "C" {
-  #include <stdlib.h>
-  #include <string.h>
-  #include <inttypes.h>
-  #include "stm32_def.h"
+#include <stdlib.h>
+#include <string.h>
+#include <inttypes.h>
+#include "stm32_def.h"
 }
 #include "assert.h"
 #include "STM32SD.h"
@@ -65,11 +65,11 @@ SDClass SD;
   */
 uint8_t SDClass::begin(uint32_t cspin)
 {
-	/*##-1- Initializes SD IOs #############################################*/
-	if (_card.init(cspin)) {
-		return _fatFs.init();
-    }
-    return FALSE;
+  /*##-1- Initializes SD IOs #############################################*/
+  if (_card.init(cspin)) {
+    return _fatFs.init();
+  }
+  return FALSE;
 }
 
 /**
@@ -79,16 +79,13 @@ uint8_t SDClass::begin(uint32_t cspin)
   */
 uint8_t SDClass::exists(const char *filepath)
 {
-    FILINFO fno;
+  FILINFO fno;
 
-    if(f_stat(filepath, &fno) != FR_OK)
-    {
-        return FALSE;
-    }
-    else
-    {
-        return TRUE;
-    }
+  if (f_stat(filepath, &fno) != FR_OK) {
+    return FALSE;
+  } else {
+    return TRUE;
+  }
 }
 
 /**
@@ -98,14 +95,11 @@ uint8_t SDClass::exists(const char *filepath)
   */
 uint8_t SDClass::mkdir(const char *filepath)
 {
-   if(f_mkdir(filepath) != FR_OK)
-    {
-        return FALSE;
-    }
-    else
-    {
-        return TRUE;
-    }
+  if (f_mkdir(filepath) != FR_OK) {
+    return FALSE;
+  } else {
+    return TRUE;
+  }
 }
 
 /**
@@ -115,14 +109,11 @@ uint8_t SDClass::mkdir(const char *filepath)
   */
 uint8_t SDClass::rmdir(const char *filepath)
 {
-    if(f_unlink(filepath) != FR_OK)
-    {
-        return FALSE;
-    }
-    else
-    {
-        return TRUE;
-    }
+  if (f_unlink(filepath) != FR_OK) {
+    return FALSE;
+  } else {
+    return TRUE;
+  }
 }
 
 /**
@@ -132,13 +123,12 @@ uint8_t SDClass::rmdir(const char *filepath)
   */
 File SDClass::open(const char *filepath)
 {
-    File file = File(filepath);
+  File file = File(filepath);
 
-    if(f_open(file._fil, filepath, FA_READ) != FR_OK)
-    {
-		f_opendir(&file._dir, filepath);
-	}
-	return file;
+  if (f_open(file._fil, filepath, FA_READ) != FR_OK) {
+    f_opendir(&file._dir, filepath);
+  }
+  return file;
 }
 
 /**
@@ -149,18 +139,16 @@ File SDClass::open(const char *filepath)
   */
 File SDClass::open(const char *filepath, uint8_t mode)
 {
-	File file = File(filepath);
+  File file = File(filepath);
 
-	if((mode == FILE_WRITE) && (SD.exists(filepath) != TRUE))
-    {
-        mode = mode | FA_CREATE_ALWAYS;
-    }
+  if ((mode == FILE_WRITE) && (SD.exists(filepath) != TRUE)) {
+    mode = mode | FA_CREATE_ALWAYS;
+  }
 
-    if(f_open(file._fil, filepath, mode) != FR_OK)
-    {
-		f_opendir(&file._dir, filepath);
-	}
-    return file;
+  if (f_open(file._fil, filepath, mode) != FR_OK) {
+    f_opendir(&file._dir, filepath);
+  }
+  return file;
 }
 
 /**
@@ -170,58 +158,54 @@ File SDClass::open(const char *filepath, uint8_t mode)
   */
 uint8_t SDClass::remove(const char *filepath)
 {
-   if(f_unlink(filepath) != FR_OK)
-    {
-        return FALSE;
-    }
-    else
-    {
-        return TRUE;
-    }
+  if (f_unlink(filepath) != FR_OK) {
+    return FALSE;
+  } else {
+    return TRUE;
+  }
 }
 
 File SDClass::openRoot(void)
 {
-    File file = File(_fatFs.getRoot());
+  File file = File(_fatFs.getRoot());
 
-	if(f_opendir(&file._dir, _fatFs.getRoot()) != FR_OK)
-	{
+  if (f_opendir(&file._dir, _fatFs.getRoot()) != FR_OK) {
 #if _FATFS == 68300
-		file._dir.obj.fs = 0;
+    file._dir.obj.fs = 0;
 #else
-		file._dir.fs = 0;
+    file._dir.fs = 0;
 #endif
-	}
-    return file;
+  }
+  return file;
 }
 
 File::File()
 {
-	_name = NULL;
-	_fil = (FIL*)malloc(sizeof(FIL));
-	assert(_fil != NULL );
+  _name = NULL;
+  _fil = (FIL *)malloc(sizeof(FIL));
+  assert(_fil != NULL);
 #if _FATFS == 68300
-	_fil->obj.fs = 0;
-	_dir.obj.fs = 0;
+  _fil->obj.fs = 0;
+  _dir.obj.fs = 0;
 #else
-	_fil->fs = 0;
-	_dir.fs = 0;
+  _fil->fs = 0;
+  _dir.fs = 0;
 #endif
 }
 
-File::File(const char* name)
+File::File(const char *name)
 {
-	_name = (char*)malloc(strlen(name) +1);
-	assert(_name  != NULL );
-	sprintf(_name, "%s", name);
-    _fil = (FIL*)malloc(sizeof(FIL));
-	assert(_fil != NULL );
+  _name = (char *)malloc(strlen(name) + 1);
+  assert(_name  != NULL);
+  sprintf(_name, "%s", name);
+  _fil = (FIL *)malloc(sizeof(FIL));
+  assert(_fil != NULL);
 #if _FATFS == 68300
-	_fil->obj.fs = 0;
-	_dir.obj.fs = 0;
+  _fil->obj.fs = 0;
+  _dir.obj.fs = 0;
 #else
-	_fil->fs = 0;
-	_dir.fs = 0;
+  _fil->fs = 0;
+  _dir.fs = 0;
 #endif
 }
 
@@ -238,7 +222,8 @@ File::File(const char* name)
  * \param[in] indent Amount of space before file name. Used for recursive
  * list to indicate subdirectory level.
  */
-void File::ls(uint8_t flags, uint8_t indent) {
+void File::ls(uint8_t flags, uint8_t indent)
+{
   FRESULT res = FR_OK;
   FILINFO fno;
   char *fn;
@@ -253,15 +238,12 @@ void File::ls(uint8_t flags, uint8_t indent) {
 #endif
 #endif
 
-  while(1)
-  {
+  while (1) {
     res = f_readdir(&_dir, &fno);
-    if(res != FR_OK || fno.fname[0] == 0)
-    {
+    if (res != FR_OK || fno.fname[0] == 0) {
       break;
     }
-    if(fno.fname[0] == '.')
-    {
+    if (fno.fname[0] == '.') {
       continue;
     }
 #if _USE_LFN && _FATFS != 68300
@@ -269,53 +251,51 @@ void File::ls(uint8_t flags, uint8_t indent) {
 #else
     fn = fno.fname;
 #endif
-	//print any indent spaces
-	for (int8_t i = 0; i < indent; i++) Serial.print(' ');
+    //print any indent spaces
+    for (int8_t i = 0; i < indent; i++) {
+      Serial.print(' ');
+    }
     Serial.print(fn);
 
-    if((fno.fattrib & AM_DIR) == 0)
-    {
-	  // print modify date/time if requested
-	  if (flags & LS_DATE) {
-		Serial.print(' ');
-		printFatDate(fno.fdate);
-		Serial.print(' ');
-		printFatTime(fno.ftime);
-	  }
-	  // print size if requested
-	  if (flags & LS_SIZE) {
-	    Serial.print(' ');
-	    Serial.print(fno.fsize);
-	  }
-	  Serial.println();
-    }
-	else
-	{
-	  // list subdirectory content if requested
-	  if (flags & LS_R)
-	  {
-		char *fullPath;
-		fullPath = (char*)malloc(strlen(_name) + 1 + strlen(fn) +1);
-		if (fullPath != NULL) {
-		  sprintf(fullPath, "%s/%s", _name, fn);
-		  File filtmp = SD.open(fullPath);
+    if ((fno.fattrib & AM_DIR) == 0) {
+      // print modify date/time if requested
+      if (flags & LS_DATE) {
+        Serial.print(' ');
+        printFatDate(fno.fdate);
+        Serial.print(' ');
+        printFatTime(fno.ftime);
+      }
+      // print size if requested
+      if (flags & LS_SIZE) {
+        Serial.print(' ');
+        Serial.print(fno.fsize);
+      }
+      Serial.println();
+    } else {
+      // list subdirectory content if requested
+      if (flags & LS_R) {
+        char *fullPath;
+        fullPath = (char *)malloc(strlen(_name) + 1 + strlen(fn) + 1);
+        if (fullPath != NULL) {
+          sprintf(fullPath, "%s/%s", _name, fn);
+          File filtmp = SD.open(fullPath);
 
-		  if (filtmp._name != NULL) {
-			Serial.println();
-			filtmp.ls(flags, indent+2);
-			filtmp.close();
-		  } else {
-			Serial.println(fn);
-			Serial.print("Error to open dir: ");
-			Serial.println(fn);
-		  }
-		  free(fullPath);
-		} else {
-		  Serial.println();
-		  Serial.print("Error to allocate memory!");
-		}
-	  }
-	}
+          if (filtmp._name != NULL) {
+            Serial.println();
+            filtmp.ls(flags, indent + 2);
+            filtmp.close();
+          } else {
+            Serial.println(fn);
+            Serial.print("Error to open dir: ");
+            Serial.println(fn);
+          }
+          free(fullPath);
+        } else {
+          Serial.println();
+          Serial.print("Error to allocate memory!");
+        }
+      }
+    }
   }
 }
 //------------------------------------------------------------------------------
@@ -325,7 +305,8 @@ void File::ls(uint8_t flags, uint8_t indent) {
  *
  * \param[in] fatDate The date field from a directory entry.
  */
-void File::printFatDate(uint16_t fatDate) {
+void File::printFatDate(uint16_t fatDate)
+{
   Serial.print(FAT_YEAR(fatDate));
   Serial.print('-');
   printTwoDigits(FAT_MONTH(fatDate));
@@ -339,7 +320,8 @@ void File::printFatDate(uint16_t fatDate) {
  *
  * \param[in] fatTime The time field from a directory entry.
  */
-void File::printFatTime(uint16_t fatTime) {
+void File::printFatTime(uint16_t fatTime)
+{
   printTwoDigits(FAT_HOUR(fatTime));
   Serial.print(':');
   printTwoDigits(FAT_MINUTE(fatTime));
@@ -351,9 +333,10 @@ void File::printFatTime(uint16_t fatTime) {
  *
  * \param[in] v Value to be printed, 0 <= \a v <= 99
  */
-void File::printTwoDigits(uint8_t v) {
+void File::printTwoDigits(uint8_t v)
+{
   char str[3];
-  str[0] = '0' + v/10;
+  str[0] = '0' + v / 10;
   str[1] = '0' + v % 10;
   str[2] = 0;
   Serial.print(str);
@@ -365,10 +348,10 @@ void File::printTwoDigits(uint8_t v) {
   */
 int File::read()
 {
-    uint8_t byteread;
-    int8_t data;
-    f_read(_fil, (void *)&data, 1, (UINT *)&byteread);
-    return data;
+  uint8_t byteread;
+  int8_t data;
+  f_read(_fil, (void *)&data, 1, (UINT *)&byteread);
+  return data;
 }
 
 /**
@@ -377,12 +360,12 @@ int File::read()
   * @param  len: the number of elements to read
   * @retval Number of bytes read
   */
-int File::read(void* buf, size_t len)
+int File::read(void *buf, size_t len)
 {
-    uint8_t bytesread;
+  uint8_t bytesread;
 
-    f_read(_fil, buf, len, (UINT *)&bytesread);
-    return bytesread;
+  f_read(_fil, buf, len, (UINT *)&bytesread);
+  return bytesread;
 
 }
 
@@ -393,31 +376,30 @@ int File::read(void* buf, size_t len)
   */
 void File::close()
 {
-	if(_name)
-	{
+  if (_name) {
 #if _FATFS == 68300
-		if(_fil && _fil->obj.fs != 0) {
+    if (_fil && _fil->obj.fs != 0) {
 #else
-		if(_fil && _fil->fs != 0) {
+    if (_fil && _fil->fs != 0) {
 #endif
-			/* Flush the file before close */
-			f_sync(_fil);
+      /* Flush the file before close */
+      f_sync(_fil);
 
-			/* Close the file */
-			f_close(_fil);
-            free(_fil);
-		}
+      /* Close the file */
+      f_close(_fil);
+      free(_fil);
+    }
 
 #if _FATFS == 68300
-		if(_dir.obj.fs != 0) {
+    if (_dir.obj.fs != 0) {
 #else
-		if(_dir.fs != 0) {
+    if (_dir.fs != 0) {
 #endif
-			f_closedir(&_dir);
-		}
+      f_closedir(&_dir);
+    }
 
-		free(_name);
-	}
+    free(_name);
+  }
 }
 
 
@@ -428,7 +410,7 @@ void File::close()
   */
 void File::flush()
 {
-    f_sync(_fil);
+  f_sync(_fil);
 }
 
 /**
@@ -438,10 +420,10 @@ void File::flush()
   */
 int File::peek()
 {
-    int data;
-    data = read();
-    seek(position() -1);
-    return data;
+  int data;
+  data = read();
+  seek(position() - 1);
+  return data;
 }
 
 /**
@@ -451,9 +433,9 @@ int File::peek()
   */
 uint32_t File::position()
 {
-    uint32_t filepos = 0;
-    filepos = f_tell(_fil);
-    return filepos;
+  uint32_t filepos = 0;
+  filepos = f_tell(_fil);
+  return filepos;
 }
 
 /**
@@ -463,18 +445,12 @@ uint32_t File::position()
   */
 uint8_t File::seek(uint32_t pos)
 {
-  if(pos > size())
-  {
+  if (pos > size()) {
     return FALSE;
-  }
-  else
-  {
-    if(f_lseek(_fil, pos) != FR_OK)
-    {
+  } else {
+    if (f_lseek(_fil, pos) != FR_OK) {
       return FALSE;
-    }
-    else
-    {
+    } else {
       return TRUE;
     }
   }
@@ -487,17 +463,18 @@ uint8_t File::seek(uint32_t pos)
   */
 uint32_t File::size()
 {
-    uint32_t file_size = 0;
+  uint32_t file_size = 0;
 
-    file_size = f_size(_fil);
-    return(file_size);
+  file_size = f_size(_fil);
+  return (file_size);
 }
 
-File::operator bool() {
+File::operator bool()
+{
 #if _FATFS == 68300
-  return  ((_name == NULL) || ((_fil == NULL) && (_dir.obj.fs == 0)) || ((_fil != NULL) && (_fil->obj.fs == 0) && (_dir.obj.fs == 0))) ? FALSE : TRUE;
+  return ((_name == NULL) || ((_fil == NULL) && (_dir.obj.fs == 0)) || ((_fil != NULL) && (_fil->obj.fs == 0) && (_dir.obj.fs == 0))) ? FALSE : TRUE;
 #else
-  return  ((_name == NULL) || ((_fil == NULL) && (_dir.fs == 0)) || ((_fil != NULL) && (_fil->fs == 0) && (_dir.fs == 0))) ? FALSE : TRUE;
+  return ((_name == NULL) || ((_fil == NULL) && (_dir.fs == 0)) || ((_fil != NULL) && (_fil->fs == 0) && (_dir.fs == 0))) ? FALSE : TRUE;
 #endif
 }
 /**
@@ -518,14 +495,14 @@ size_t File::write(uint8_t data)
   */
 size_t File::write(const char *buf, size_t size)
 {
-    size_t byteswritten;
-    f_write(_fil, (const void *)buf, size, (UINT *)&byteswritten);
-    return byteswritten;
+  size_t byteswritten;
+  f_write(_fil, (const void *)buf, size, (UINT *)&byteswritten);
+  return byteswritten;
 }
 
 size_t File::write(const uint8_t *buf, size_t size)
 {
-    return write((const char *)buf, size);
+  return write((const char *)buf, size);
 }
 
 /**
@@ -533,9 +510,9 @@ size_t File::write(const uint8_t *buf, size_t size)
   * @param  data: Data to write to the file
   * @retval Number of data written (1)
   */
-size_t File::print(const char* data)
+size_t File::print(const char *data)
 {
-	return write(data, strlen(data));
+  return write(data, strlen(data));
 }
 
 /**
@@ -544,7 +521,7 @@ size_t File::print(const char* data)
   */
 size_t File::println()
 {
-    return write("\r\n", 2);
+  return write("\r\n", 2);
 }
 
 /**
@@ -552,11 +529,11 @@ size_t File::println()
   * @param  data: Data to write to the file
   * @retval Number of data written (1)
   */
-size_t File::println(const char* data)
+size_t File::println(const char *data)
 {
-	size_t bytewritten = write(data, strlen(data));
-	bytewritten += println();
-	return bytewritten;
+  size_t bytewritten = write(data, strlen(data));
+  bytewritten += println();
+  return bytewritten;
 }
 
 /**
@@ -564,9 +541,9 @@ size_t File::println(const char* data)
   * @param  data: Data of type String to write to the file
   * @retval Number of data written (1)
   */
-size_t File::println(String& data)
+size_t File::println(String &data)
 {
-   return println(data.c_str());
+  return println(data.c_str());
 }
 
 /**
@@ -575,17 +552,18 @@ size_t File::println(String& data)
   */
 int File::available()
 {
-    uint32_t n = size() - position();
-    return n > 0x7FFF ? 0x7FFF : n;
+  uint32_t n = size() - position();
+  return n > 0x7FFF ? 0x7FFF : n;
 }
 
 
-char* File::name()
+char *File::name()
 {
-	char *name = strrchr(_name, '/');
-	if (name && name[0] == '/')
-		name++;
-	return name;
+  char *name = strrchr(_name, '/');
+  if (name && name[0] == '/') {
+    name++;
+  }
+  return name;
 }
 
 /**
@@ -594,30 +572,28 @@ char* File::name()
   */
 uint8_t File::isDirectory()
 {
-    FILINFO fno;
-	assert(_name  != NULL );
+  FILINFO fno;
+  assert(_name  != NULL);
 #if _FATFS == 68300
-	if(_dir.obj.fs != 0)
+  if (_dir.obj.fs != 0)
 #else
-	if(_dir.fs != 0)
+  if (_dir.fs != 0)
 #endif
-		return TRUE;
+    return TRUE;
 #if _FATFS == 68300
-	else if (_fil->obj.fs != 0)
+  else if (_fil->obj.fs != 0)
 #else
-	else if (_fil->fs != 0)
+  else if (_fil->fs != 0)
 #endif
-		return FALSE;
-	// if not init get info
-	if (f_stat(_name, &fno) == FR_OK)
-	{
-		if(fno.fattrib & AM_DIR)
-		{
-			return TRUE;
-		}
-	}
-	// Assume not a directory
-	return FALSE;
+    return FALSE;
+  // if not init get info
+  if (f_stat(_name, &fno) == FR_OK) {
+    if (fno.fattrib & AM_DIR) {
+      return TRUE;
+    }
+  }
+  // Assume not a directory
+  return FALSE;
 }
 
 File File::openNextFile(uint8_t mode)
@@ -626,22 +602,19 @@ File File::openNextFile(uint8_t mode)
   FILINFO fno;
   char *fn;
   char *fullPath = NULL;
-  size_t name_len= strlen(_name);
+  size_t name_len = strlen(_name);
   size_t len = name_len;
 #if _USE_LFN && _FATFS != 68300
   static char lfn[_MAX_LFN];
   fno.lfname = lfn;
   fno.lfsize = sizeof(lfn);
 #endif
-  while(1)
-  {
+  while (1) {
     res = f_readdir(&_dir, &fno);
-    if(res != FR_OK || fno.fname[0] == 0)
-    {
+    if (res != FR_OK || fno.fname[0] == 0) {
       return File();
     }
-    if(fno.fname[0] == '.')
-    {
+    if (fno.fname[0] == '.') {
       continue;
     }
 #if _USE_LFN && _FATFS != 68300
@@ -649,37 +622,35 @@ File File::openNextFile(uint8_t mode)
 #else
     fn = fno.fname;
 #endif
-	len += strlen(fn) +2;
-	fullPath = (char*)malloc(len);
-	if (fullPath != NULL) {
-	  // Avoid twice '/'
-	  if ((name_len > 0)  && (_name[name_len-1] == '/'))
-	  {
-		sprintf(fullPath, "%s%s", _name, fn);
-	  } else {
-	    sprintf(fullPath, "%s/%s", _name, fn);
-	  }
-	  File filtmp = SD.open(fullPath, mode);
-	  free(fullPath);
-	  return filtmp;
-	} else {
-		return File();
-	}
+    len += strlen(fn) + 2;
+    fullPath = (char *)malloc(len);
+    if (fullPath != NULL) {
+      // Avoid twice '/'
+      if ((name_len > 0)  && (_name[name_len - 1] == '/')) {
+        sprintf(fullPath, "%s%s", _name, fn);
+      } else {
+        sprintf(fullPath, "%s/%s", _name, fn);
+      }
+      File filtmp = SD.open(fullPath, mode);
+      free(fullPath);
+      return filtmp;
+    } else {
+      return File();
+    }
   }
 }
 
 void File::rewindDirectory(void)
 {
-	if(isDirectory())
-	{
+  if (isDirectory()) {
 #if _FATFS == 68300
-		if(_dir.obj.fs != 0) {
+    if (_dir.obj.fs != 0) {
 #else
-		if(_dir.fs != 0) {
+    if (_dir.fs != 0) {
 #endif
-			f_closedir(&_dir);
-		}
-		f_opendir(&_dir, _name);
-	}
+      f_closedir(&_dir);
+    }
+    f_opendir(&_dir, _name);
+  }
 }
 

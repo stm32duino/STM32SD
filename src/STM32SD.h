@@ -31,68 +31,71 @@ uint8_t const LS_SIZE = 2;
 uint8_t const LS_R = 4;
 
 class File {
-public:
-  File(void);
-  File(const char* name);
-  virtual size_t write(uint8_t);
-  virtual size_t write(const uint8_t *buf, size_t size);
-  virtual size_t write(const char *buf, size_t size);
+  public:
+    File(void);
+    File(const char *name);
+    virtual size_t write(uint8_t);
+    virtual size_t write(const uint8_t *buf, size_t size);
+    virtual size_t write(const char *buf, size_t size);
 
-  virtual int read();
-  virtual int peek();
-  virtual int available();
-  virtual void flush();
-  int read(void* buf, size_t len);
-  uint8_t seek(uint32_t pos);
-  uint32_t position();
-  uint32_t size();
-  void close();
-  operator bool();
+    virtual int read();
+    virtual int peek();
+    virtual int available();
+    virtual void flush();
+    int read(void *buf, size_t len);
+    uint8_t seek(uint32_t pos);
+    uint32_t position();
+    uint32_t size();
+    void close();
+    operator bool();
 
-  char* name(void);
-  char* fullname(void) {return _name;};
-  uint8_t isDirectory();
-  File openNextFile(uint8_t mode = FILE_READ);
-  void rewindDirectory(void);
+    char *name(void);
+    char *fullname(void)
+    {
+      return _name;
+    };
+    uint8_t isDirectory();
+    File openNextFile(uint8_t mode = FILE_READ);
+    void rewindDirectory(void);
 
-  virtual size_t print(const char* data);
-  virtual size_t println();
-  virtual size_t println(const char* data);
-  virtual size_t println(String& data);
+    virtual size_t print(const char *data);
+    virtual size_t println();
+    virtual size_t println(const char *data);
+    virtual size_t println(String &data);
 
-  // Print to Serial line
-  void ls(uint8_t flags, uint8_t indent = 0);
-  static void printFatDate(uint16_t fatDate);
-  static void printFatTime(uint16_t fatTime);
-  static void printTwoDigits(uint8_t v);
+    // Print to Serial line
+    void ls(uint8_t flags, uint8_t indent = 0);
+    static void printFatDate(uint16_t fatDate);
+    static void printFatTime(uint16_t fatTime);
+    static void printTwoDigits(uint8_t v);
 
 
-  char *_name = NULL; //file or dir name
-  FIL* _fil = NULL; // underlying file object structure pointer
-  DIR _dir = {}; // init all fields to 0
+    char *_name = NULL; //file or dir name
+    FIL *_fil = NULL; // underlying file object structure pointer
+    DIR _dir = {}; // init all fields to 0
 
 };
 
 class SDClass {
 
-public:
+  public:
 
-  /* Initialize the SD peripheral */
-  uint8_t begin(uint32_t cspin = SD_DETECT_NONE);
-  static File open(const char *filepath, uint8_t mode);
-  static File open(const char *filepath);
-  static uint8_t exists(const char *filepath);
-  static uint8_t mkdir(const char *filepath);
-  static uint8_t remove(const char *filepath);
-  static uint8_t rmdir(const char *filepath);
+    /* Initialize the SD peripheral */
+    uint8_t begin(uint32_t cspin = SD_DETECT_NONE);
+    static File open(const char *filepath, uint8_t mode);
+    static File open(const char *filepath);
+    static uint8_t exists(const char *filepath);
+    static uint8_t mkdir(const char *filepath);
+    static uint8_t remove(const char *filepath);
+    static uint8_t rmdir(const char *filepath);
 
-  File openRoot(void);
+    File openRoot(void);
 
-  friend class File;
+    friend class File;
 
-private:
-  Sd2Card _card;
-  SdFatFs _fatFs;
+  private:
+    Sd2Card _card;
+    SdFatFs _fatFs;
 
 };
 

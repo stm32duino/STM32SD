@@ -37,23 +37,25 @@
 #include <Arduino.h>
 #include "Sd2Card.h"
 
-uint8_t Sd2Card::init(uint32_t cspin) {
-	if(cspin != SD_DETECT_NONE) {
-		PinName p = digitalPinToPinName(cspin);
-		if((p == NC) ||\
-		   BSP_SD_CSSet(set_GPIO_Port_Clock(STM_PORT(p)),
-						 STM_GPIO_PIN(p)) != MSD_OK) {
-			return FALSE;
-		}
-	}
-	if (BSP_SD_Init() == MSD_OK) {
-		BSP_SD_GetCardInfo(&_SdCardInfo);
-		return TRUE;
-	}
-	return FALSE;
+uint8_t Sd2Card::init(uint32_t cspin)
+{
+  if (cspin != SD_DETECT_NONE) {
+    PinName p = digitalPinToPinName(cspin);
+    if ((p == NC) || \
+        BSP_SD_CSSet(set_GPIO_Port_Clock(STM_PORT(p)),
+                     STM_GPIO_PIN(p)) != MSD_OK) {
+      return FALSE;
+    }
+  }
+  if (BSP_SD_Init() == MSD_OK) {
+    BSP_SD_GetCardInfo(&_SdCardInfo);
+    return TRUE;
+  }
+  return FALSE;
 }
 
-uint8_t Sd2Card::type(void) const {
+uint8_t Sd2Card::type(void) const
+{
   uint8_t cardType = SD_CARD_TYPE_UKN;
 #ifndef STM32L1xx
   switch (_SdCardInfo.CardType) {
@@ -61,20 +63,20 @@ uint8_t Sd2Card::type(void) const {
       switch (_SdCardInfo.CardVersion) {
         case CARD_V1_X:
           cardType = SD_CARD_TYPE_SD1;
-        break;
+          break;
         case CARD_V2_X:
           cardType = SD_CARD_TYPE_SD2;
-        break;
+          break;
         default:
           cardType = SD_CARD_TYPE_UKN;
       }
-    break;
+      break;
     case CARD_SDHC_SDXC:
       cardType = SD_CARD_TYPE_SDHC;
-    break;
+      break;
     case CARD_SECURED:
       cardType = SD_CARD_TYPE_SECURED;
-    break;
+      break;
     default:
       cardType = SD_CARD_TYPE_UKN;
   }
@@ -82,13 +84,13 @@ uint8_t Sd2Card::type(void) const {
   switch (_SdCardInfo.CardType) {
     case STD_CAPACITY_SD_CARD_V1_1:
       cardType = SD_CARD_TYPE_SD1;
-    break;
+      break;
     case STD_CAPACITY_SD_CARD_V2_0:
       cardType = SD_CARD_TYPE_SD2;
-    break;
+      break;
     case HIGH_CAPACITY_SD_CARD:
       cardType = SD_CARD_TYPE_SDHC;
-    break;
+      break;
     default:
       cardType = SD_CARD_TYPE_UKN;
   }

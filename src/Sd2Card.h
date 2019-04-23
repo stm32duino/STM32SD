@@ -54,15 +54,15 @@
 #define SD_CARD_TYPE_SECURED  4
 
 class Sd2Card {
- public:
+  public:
 
-  uint8_t init(uint32_t cspin = SD_DETECT_NONE);
+    uint8_t init(uint32_t cspin = SD_DETECT_NONE);
 
-  /** Return the card type: SD V1, SD V2 or SDHC */
-  uint8_t type(void) const;
+    /** Return the card type: SD V1, SD V2 or SDHC */
+    uint8_t type(void) const;
 
-private:
-  SD_CardInfo _SdCardInfo;
+  private:
+    SD_CardInfo _SdCardInfo;
 
 };
 #endif  // sd2Card_h

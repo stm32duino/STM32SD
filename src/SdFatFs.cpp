@@ -37,32 +37,30 @@
 #include <Arduino.h>
 #include "SdFatFs.h"
 
-uint8_t SdFatFs::init(void) {
+uint8_t SdFatFs::init(void)
+{
 
-	/*##-1- Link the SD disk I/O driver ########################################*/
-	if(FATFS_LinkDriver(&SD_Driver, _SDPath) == 0)
-	{
-		/*##-2- Register the file system object to the FatFs module ##############*/
-		if(f_mount(&_SDFatFs, (TCHAR const*)_SDPath, 1) == FR_OK)
-		{
-			/* FatFs Initialization done */
-			return TRUE;
-		}
-	}
-    return FALSE;
+  /*##-1- Link the SD disk I/O driver ########################################*/
+  if (FATFS_LinkDriver(&SD_Driver, _SDPath) == 0) {
+    /*##-2- Register the file system object to the FatFs module ##############*/
+    if (f_mount(&_SDFatFs, (TCHAR const *)_SDPath, 1) == FR_OK) {
+      /* FatFs Initialization done */
+      return TRUE;
+    }
+  }
+  return FALSE;
 }
 
 uint8_t SdFatFs::fatType(void)
 {
-	switch (_SDFatFs.fs_type)
-	{
-	case FS_FAT12:
-		return 12;
-	case FS_FAT16:
-		return 16;
-	case FS_FAT32:
-		return 32;
-	default:
-		return 0;
-	}
+  switch (_SDFatFs.fs_type) {
+    case FS_FAT12:
+      return 12;
+    case FS_FAT16:
+      return 16;
+    case FS_FAT32:
+      return 32;
+    default:
+      return 0;
+  }
 }

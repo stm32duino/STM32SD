@@ -47,48 +47,63 @@
 #define   FILE_READ   FA_READ
 
 /** year part of FAT directory date field */
-static inline uint16_t FAT_YEAR(uint16_t fatDate) {
+static inline uint16_t FAT_YEAR(uint16_t fatDate)
+{
   return 1980 + (fatDate >> 9);
 }
 /** month part of FAT directory date field */
-static inline uint8_t FAT_MONTH(uint16_t fatDate) {
+static inline uint8_t FAT_MONTH(uint16_t fatDate)
+{
   return (fatDate >> 5) & 0XF;
 }
 /** day part of FAT directory date field */
-static inline uint8_t FAT_DAY(uint16_t fatDate) {
+static inline uint8_t FAT_DAY(uint16_t fatDate)
+{
   return fatDate & 0X1F;
 }
 
 /** hour part of FAT directory time field */
-static inline uint8_t FAT_HOUR(uint16_t fatTime) {
+static inline uint8_t FAT_HOUR(uint16_t fatTime)
+{
   return fatTime >> 11;
 }
 /** minute part of FAT directory time field */
-static inline uint8_t FAT_MINUTE(uint16_t fatTime) {
-  return(fatTime >> 5) & 0X3F;
+static inline uint8_t FAT_MINUTE(uint16_t fatTime)
+{
+  return (fatTime >> 5) & 0X3F;
 }
 /** second part of FAT directory time field */
-static inline uint8_t FAT_SECOND(uint16_t fatTime) {
-  return 2*(fatTime & 0X1F);
+static inline uint8_t FAT_SECOND(uint16_t fatTime)
+{
+  return 2 * (fatTime & 0X1F);
 }
 
 class SdFatFs {
- public:
+  public:
 
-  uint8_t init(void);
+    uint8_t init(void);
 
-  /** Return the FatFs type: 12, 16, 32 (0: unknown)*/
-  uint8_t fatType(void);
+    /** Return the FatFs type: 12, 16, 32 (0: unknown)*/
+    uint8_t fatType(void);
 
-  // inline functions that return volume info
-  /** \return The volume's cluster size in blocks. */
-  uint8_t blocksPerCluster(void) const {return _SDFatFs.csize;}
-  /** \return The total number of clusters in the volume. */
-  uint32_t clusterCount(void) const {return (_SDFatFs.n_fatent -2);}
+    // inline functions that return volume info
+    /** \return The volume's cluster size in blocks. */
+    uint8_t blocksPerCluster(void) const
+    {
+      return _SDFatFs.csize;
+    }
+    /** \return The total number of clusters in the volume. */
+    uint32_t clusterCount(void) const
+    {
+      return (_SDFatFs.n_fatent - 2);
+    }
 
-  char* getRoot(void) { return _SDPath;};
-private:
-	FATFS _SDFatFs;  /* File system object for SD disk logical drive */
-	char _SDPath[4]; /* SD disk logical drive path */
+    char *getRoot(void)
+    {
+      return _SDPath;
+    };
+  private:
+    FATFS _SDFatFs;  /* File system object for SD disk logical drive */
+    char _SDPath[4]; /* SD disk logical drive path */
 };
 #endif  // sdFatFs_h
