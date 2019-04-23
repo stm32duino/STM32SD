@@ -53,7 +53,6 @@ extern "C" {
 #include <inttypes.h>
 #include "stm32_def.h"
 }
-#include "assert.h"
 #include "STM32SD.h"
 SDClass SD;
 
@@ -183,7 +182,9 @@ File::File()
 {
   _name = NULL;
   _fil = (FIL *)malloc(sizeof(FIL));
-  assert(_fil != NULL);
+  if (_fil == NULL) {
+    Error_Handler();
+  }
 #if _FATFS == 68300
   _fil->obj.fs = 0;
   _dir.obj.fs = 0;
@@ -196,10 +197,14 @@ File::File()
 File::File(const char *name)
 {
   _name = (char *)malloc(strlen(name) + 1);
-  assert(_name  != NULL);
+  if (_name == NULL) {
+    Error_Handler();
+  }
   sprintf(_name, "%s", name);
   _fil = (FIL *)malloc(sizeof(FIL));
-  assert(_fil != NULL);
+  if (_fil == NULL) {
+    Error_Handler();
+  }
 #if _FATFS == 68300
   _fil->obj.fs = 0;
   _dir.obj.fs = 0;
@@ -578,7 +583,9 @@ char *File::name()
 uint8_t File::isDirectory()
 {
   FILINFO fno;
-  assert(_name  != NULL);
+  if (_name == NULL) {
+    Error_Handler();
+  }
 #if _FATFS == 68300
   if (_dir.obj.fs != 0)
 #else
