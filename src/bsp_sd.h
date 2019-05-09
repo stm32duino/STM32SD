@@ -44,7 +44,11 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+#include "stm32_def.h"
+#if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION  <= 0x01050000)
 #include "variant.h"
+#endif
+
 /* Could be redefined in variant.h or using build_opt.h */
 #ifndef SD_DATATIMEOUT
 #define SD_DATATIMEOUT         100000000U
