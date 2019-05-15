@@ -156,7 +156,7 @@ uint8_t BSP_SD_Init(void)
   uSdHandle.Instance = SD_INSTANCE;
 
   uSdHandle.Init.ClockEdge           = SD_CLK_EDGE;
-#ifndef STM32H7xx
+#if !defined(STM32L4xx) && !defined(STM32H7xx)
   uSdHandle.Init.ClockBypass         = SD_CLK_BYPASS;
 #endif
   uSdHandle.Init.ClockPowerSave      = SD_CLK_PWR_SAVE;
