@@ -90,11 +90,12 @@ uint8_t SDClass::exists(const char *filepath)
 /**
   * @brief  Create directory on the SD disk
   * @param  filename: File name
-  * @retval TRUE or FALSE
+  * @retval TRUE if created or existing else FALSE
   */
 uint8_t SDClass::mkdir(const char *filepath)
 {
-  if (f_mkdir(filepath) != FR_OK) {
+  FRESULT res = f_mkdir(filepath);
+  if ((res != FR_OK) && (res != FR_EXIST)) {
     return FALSE;
   } else {
     return TRUE;
