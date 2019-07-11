@@ -354,10 +354,12 @@ void File::printTwoDigits(uint8_t v)
   */
 int File::read()
 {
-  uint8_t byteread;
+  UINT byteread;
   int8_t data;
-  f_read(_fil, (void *)&data, 1, (UINT *)&byteread);
-  return data;
+  if (f_read(_fil, (void *)&data, 1, (UINT *)&byteread) == FR_OK) {
+    return data;
+  }
+  return -1;
 }
 
 /**
@@ -368,11 +370,12 @@ int File::read()
   */
 int File::read(void *buf, size_t len)
 {
-  uint8_t bytesread;
+  UINT bytesread;
 
-  f_read(_fil, buf, len, (UINT *)&bytesread);
-  return bytesread;
-
+  if (f_read(_fil, buf, len, (UINT *)&bytesread) == FR_OK) {
+    return bytesread;
+  }
+  return -1;
 }
 
 /**
