@@ -48,7 +48,10 @@ extern "C" {
 #if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION  <= 0x01050000)
 #include "variant.h"
 #endif
-
+#if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION  <= 0x01060100)
+#error "This library version required a STM32 core version > 1.6.1.\
+Please update the core or install previous libray version."
+#endif
 /* Could be redefined in variant.h or using build_opt.h */
 #ifndef SD_DATATIMEOUT
 #define SD_DATATIMEOUT         100000000U

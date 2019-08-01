@@ -80,6 +80,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "bsp_sd.h"
+#include "PeripheralPins.h"
 
 #ifdef SDMMC1
 /* Definition for BSP SD */
@@ -99,8 +100,6 @@
 #else
 #define SD_CLK_DIV             SDMMC_TRANSFER_CLK_DIV
 #endif
-/* Definition for MSP SD */
-#define SD_AF                  GPIO_AF12_SDMMC1
 #elif defined(SDIO)
 /* Definition for BSP SD */
 #define SD_INSTANCE            SDIO
@@ -115,18 +114,8 @@
 #define SD_HW_FLOW_CTRL        SDIO_HARDWARE_FLOW_CONTROL_DISABLE
 #endif
 #define SD_CLK_DIV             SDIO_TRANSFER_CLK_DIV
-/* Definition for MSP SD */
-#ifndef STM32F1xx
-#define SD_AF                  GPIO_AF12_SDIO
-#endif
 #else
 #error "Unknown SD_INSTANCE"
-#endif
-
-#ifdef GPIO_SPEED_FREQ_VERY_HIGH
-#define SD_GPIO_SPEED  GPIO_SPEED_FREQ_VERY_HIGH
-#else
-#define SD_GPIO_SPEED  GPIO_SPEED_FREQ_HIGH
 #endif
 
 /* BSP SD Private Variables */
@@ -408,31 +397,16 @@ __weak void BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params)
 {
   UNUSED(hsd);
   UNUSED(Params);
-  GPIO_InitTypeDef gpio_init_structure;
+
+  /* Configure SD GPIOs */
+  const PinMap *map = PinMap_SD;
+  while (map->pin != NC) {
+    pin_function(map->pin, map->function);
+    map++;
+  }
 
   /* Enable SDIO clock */
   SD_CLK_ENABLE();
-
-  /* Enable GPIOs clock */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
-
-  /* Common GPIO configuration */
-  gpio_init_structure.Mode      = GPIO_MODE_AF_PP;
-  gpio_init_structure.Pull      = GPIO_PULLUP;
-  gpio_init_structure.Speed     = SD_GPIO_SPEED;
-#ifndef STM32F1xx
-  gpio_init_structure.Alternate = SD_AF;
-#endif
-  /* GPIOC configuration */
-  gpio_init_structure.Pin = GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12;
-
-  HAL_GPIO_Init(GPIOC, &gpio_init_structure);
-
-  /* GPIOD configuration */
-  gpio_init_structure.Pin = GPIO_PIN_2;
-  HAL_GPIO_Init(GPIOD, &gpio_init_structure);
-
 }
 
 /**
