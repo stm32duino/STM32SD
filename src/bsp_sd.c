@@ -1,9 +1,6 @@
 /**
 ******************************************************************************
 * @file    bsp_sd.c
-* @author  MCD Application Team
-* @version V1.0.0
-* @date    10-June-2016
 * @brief   This file includes the uSD card driver mounted on stm32
 *          board.
 ******************************************************************************
@@ -35,48 +32,6 @@
 *
 ******************************************************************************
 */
-
-/* File Info : -----------------------------------------------------------------
-                                   User NOTES
-1. How To use this driver:
---------------------------
-   - This driver is used to drive the micro SD external card mounted on a board.
-   - This driver does not need a specific component driver for the micro SD device
-     to be included with.
-
-2. Driver description:
----------------------
-  + Initialization steps:
-     o Initialize the micro SD card using the BSP_SD_Init() function. This
-       function includes the MSP layer hardware resources initialization and the
-       SDIO interface configuration to interface with the external micro SD. It
-       also includes the micro SD initialization sequence.
-     o To check the SD card presence you can use the function BSP_SD_IsDetected() which
-       returns the detection status
-     o If SD presence detection interrupt mode is desired, you must configure the
-       SD detection interrupt mode by calling the function BSP_SD_ITConfig(). The interrupt
-       is generated as an external interrupt whenever the micro SD card is
-       plugged/unplugged in/from the board. The SD detection interrupt
-       is handled by calling the function BSP_SD_DetectIT() which is called in the IRQ
-       handler file, the user callback is implemented in the function BSP_SD_DetectCallback().
-     o The function BSP_SD_GetCardInfo() is used to get the micro SD card information
-       which is stored in the structure "HAL_SD_CardInfoTypedef".
-
-  + Micro SD card operations
-     o The micro SD card can be accessed with read/write block(s) operations once
-       it is reay for access. The access cand be performed whether using the polling
-       mode by calling the functions BSP_SD_ReadBlocks()/BSP_SD_WriteBlocks(), or by DMA
-       transfer using the functions BSP_SD_ReadBlocks_DMA()/BSP_SD_WriteBlocks_DMA()
-     o The DMA transfer complete is used with interrupt mode. Once the SD transfer
-       is complete, the SD interrupt is handeled using the function BSP_SD_IRQHandler(),
-       the DMA Tx/Rx transfer complete are handeled using the functions
-       BSP_SD_DMA_Tx_IRQHandler()/BSP_SD_DMA_Rx_IRQHandler(). The corresponding user callbacks
-       are implemented by the user at application level.
-     o The SD erase block(s) is performed using the function BSP_SD_Erase() with specifying
-       the number of blocks to erase.
-     o The SD runtime status is returned when calling the function BSP_SD_GetStatus().
-
-------------------------------------------------------------------------------*/
 
 /* Includes ------------------------------------------------------------------*/
 #include "bsp_sd.h"
@@ -139,8 +94,6 @@ uint8_t BSP_SD_Init(void)
 {
   uint8_t sd_state = MSD_OK;
 
-  /* PLLSAI is dedicated to LCD periph. Do not use it to get 48MHz*/
-
   /* uSD device interface configuration */
   uSdHandle.Instance = SD_INSTANCE;
 
@@ -187,22 +140,6 @@ uint8_t BSP_SD_Init(void)
 }
 
 /**
-  * @brief  Set the SD card device detect pin and port.
-  * @param  csport one of the gpio port
-  * @param  cspin one of the gpio pin
-  * @retval SD status
-  */
-uint8_t BSP_SD_CSSet(GPIO_TypeDef *csport, uint32_t cspin)
-{
-  if (csport != 0) {
-    SD_detect_gpio_pin = cspin;
-    SD_detect_gpio_port = csport;
-    return MSD_OK;
-  }
-  return MSD_ERROR;
-}
-
-/**
   * @brief  DeInitializes the SD card device.
   * @retval SD status
   */
@@ -225,10 +162,26 @@ uint8_t BSP_SD_DeInit(void)
 }
 
 /**
-  * @brief  Configures Interrupt mode for SD detection pin.
-  * @retval Returns 0
+  * @brief  Set the SD card device detect pin and port.
+  * @param  port one of the gpio port
+  * @param  pin one of the gpio pin
+  * @retval SD status
   */
-uint8_t BSP_SD_ITConfig(void)
+uint8_t BSP_SD_DetectPin(GPIO_TypeDef *port, uint32_t pin)
+{
+  if (port != 0) {
+    SD_detect_gpio_pin = pin;
+    SD_detect_gpio_port = port;
+    return MSD_OK;
+  }
+  return MSD_ERROR;
+}
+
+/**
+  * @brief  Configures Interrupt mode for SD detection pin.
+  * @retval Status
+  */
+uint8_t BSP_SD_DetectITConfig(void)
 {
   uint8_t sd_state = MSD_OK;
   GPIO_InitTypeDef gpio_init_structure;
@@ -443,9 +396,6 @@ __weak void BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params)
 
   /* Disable SDIO clock */
   SD_CLK_DISABLE();
-
-  /* GPOI pins clock and DMA cloks can be shut down in the applic
-     by surcgarging this __weak function */
 }
 
 #ifndef STM32L1xx
@@ -484,21 +434,5 @@ void BSP_SD_GetCardInfo(HAL_SD_CardInfoTypeDef *CardInfo)
   /* Get SD card Information */
   HAL_SD_Get_CardInfo(&uSdHandle, CardInfo);
 }
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -62,10 +62,10 @@ SDClass SD;
   * @param  None
   * @retval TRUE or FALSE
   */
-uint8_t SDClass::begin(uint32_t cspin)
+uint8_t SDClass::begin(uint32_t detectpin)
 {
   /*##-1- Initializes SD IOs #############################################*/
-  if (_card.init(cspin)) {
+  if (_card.init(detectpin)) {
     return _fatFs.init();
   }
   return FALSE;

@@ -56,7 +56,7 @@
 class Sd2Card {
   public:
 
-    uint8_t init(uint32_t cspin = SD_DETECT_NONE);
+    uint8_t init(uint32_t detectpin = SD_DETECT_NONE);
 
     /** Return the card type: SD V1, SD V2 or SDHC */
     uint8_t type(void) const;
