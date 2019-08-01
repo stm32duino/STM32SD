@@ -43,7 +43,7 @@ uint8_t Sd2Card::init(uint32_t detectpin)
     PinName p = digitalPinToPinName(detectpin);
     if ((p == NC) || \
         BSP_SD_DetectPin(set_GPIO_Port_Clock(STM_PORT(p)),
-                         STM_GPIO_PIN(p)) != MSD_OK) {
+                         STM_LL_GPIO_PIN(p)) != MSD_OK) {
       return FALSE;
     }
   }

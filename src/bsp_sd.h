@@ -81,7 +81,7 @@ Please update the core or install previous libray version."
 uint8_t BSP_SD_Init(void);
 uint8_t BSP_SD_DeInit(void);
 uint8_t BSP_SD_DetectPin(GPIO_TypeDef *port, uint32_t pin);
-uint8_t BSP_SD_DetectITConfig(void);
+uint8_t BSP_SD_DetectITConfig(void (*callback)(void));
 #ifndef STM32L1xx
 uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint32_t ReadAddr, uint32_t NumOfBlocks, uint32_t Timeout);
 uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint32_t WriteAddr, uint32_t NumOfBlocks, uint32_t Timeout);

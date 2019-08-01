@@ -35,7 +35,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "bsp_sd.h"
+#include "interrupt.h"
 #include "PeripheralPins.h"
+#include "stm32yyxx_ll_gpio.h"
 
 #ifdef SDMMC1
 /* Definition for BSP SD */
@@ -75,7 +77,7 @@
 
 /* BSP SD Private Variables */
 static SD_HandleTypeDef uSdHandle;
-static uint32_t SD_detect_gpio_pin = GPIO_PIN_All;
+static uint32_t SD_detect_ll_gpio_pin = LL_GPIO_PIN_ALL;
 static GPIO_TypeDef *SD_detect_gpio_port = GPIOA;
 #ifndef STM32L1xx
 #define SD_OK                         HAL_OK
@@ -106,7 +108,7 @@ uint8_t BSP_SD_Init(void)
   uSdHandle.Init.HardwareFlowControl = SD_HW_FLOW_CTRL;
   uSdHandle.Init.ClockDiv            = SD_CLK_DIV;
 
-  if (SD_detect_gpio_pin != GPIO_PIN_All) {
+  if (SD_detect_ll_gpio_pin != LL_GPIO_PIN_ALL) {
     /* Msp SD Detect pin initialization */
     BSP_SD_Detect_MspInit(&uSdHandle, NULL);
     if (BSP_SD_IsDetected() != SD_PRESENT) { /* Check if SD card is present */
@@ -170,7 +172,7 @@ uint8_t BSP_SD_DeInit(void)
 uint8_t BSP_SD_DetectPin(GPIO_TypeDef *port, uint32_t pin)
 {
   if (port != 0) {
-    SD_detect_gpio_pin = pin;
+    SD_detect_ll_gpio_pin = pin;
     SD_detect_gpio_port = port;
     return MSD_OK;
   }
@@ -181,61 +183,67 @@ uint8_t BSP_SD_DetectPin(GPIO_TypeDef *port, uint32_t pin)
   * @brief  Configures Interrupt mode for SD detection pin.
   * @retval Status
   */
-uint8_t BSP_SD_DetectITConfig(void)
+uint8_t BSP_SD_DetectITConfig(void (*callback)(void))
 {
-  uint8_t sd_state = MSD_OK;
-  GPIO_InitTypeDef gpio_init_structure;
-  IRQn_Type sd_detect_EXTI_IRQn = EXTI0_IRQn;
-
-  /* Configure Interrupt mode for SD detection pin */
-  gpio_init_structure.Pin = SD_detect_gpio_pin;
-  gpio_init_structure.Pull = GPIO_PULLUP;
-  gpio_init_structure.Speed = SD_GPIO_SPEED;
-  gpio_init_structure.Mode = GPIO_MODE_IT_RISING_FALLING;
-  HAL_GPIO_Init(SD_detect_gpio_port, &gpio_init_structure);
-
-  if (SD_detect_gpio_pin == GPIO_PIN_0) {
-    sd_detect_EXTI_IRQn = EXTI0_IRQn;
-  } else {
-    if (SD_detect_gpio_pin == GPIO_PIN_1) {
-      sd_detect_EXTI_IRQn = EXTI1_IRQn;
-    } else {
-      if (SD_detect_gpio_pin == GPIO_PIN_2) {
-        sd_detect_EXTI_IRQn = EXTI2_IRQn;
-      } else {
-        if (SD_detect_gpio_pin == GPIO_PIN_3) {
-          sd_detect_EXTI_IRQn = EXTI3_IRQn;
-        } else {
-          if (SD_detect_gpio_pin == GPIO_PIN_4) {
-            sd_detect_EXTI_IRQn = EXTI4_IRQn;
-          } else {
-            if ((SD_detect_gpio_pin == GPIO_PIN_5) || \
-                (SD_detect_gpio_pin == GPIO_PIN_6) || \
-                (SD_detect_gpio_pin == GPIO_PIN_7) || \
-                (SD_detect_gpio_pin == GPIO_PIN_8) || \
-                (SD_detect_gpio_pin == GPIO_PIN_9)) {
-              sd_detect_EXTI_IRQn = EXTI9_5_IRQn;
-            } else {
-              if ((SD_detect_gpio_pin == GPIO_PIN_10) || \
-                  (SD_detect_gpio_pin == GPIO_PIN_11) || \
-                  (SD_detect_gpio_pin == GPIO_PIN_12) || \
-                  (SD_detect_gpio_pin == GPIO_PIN_13) || \
-                  (SD_detect_gpio_pin == GPIO_PIN_14) || \
-                  (SD_detect_gpio_pin == GPIO_PIN_15)) {
-                sd_detect_EXTI_IRQn = EXTI15_10_IRQn;
-              } else {
-                sd_state = MSD_ERROR;
-              }
-            }
-          }
-        }
-      }
+  uint8_t sd_state = MSD_ERROR;
+  if (SD_detect_ll_gpio_pin != LL_GPIO_PIN_ALL) {
+    LL_GPIO_SetPinPull(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_PULL_UP);
+    uint16_t SD_detect_gpio_pin = GPIO_PIN_All;
+    switch (SD_detect_ll_gpio_pin) {
+      case LL_GPIO_PIN_0:
+        SD_detect_gpio_pin = GPIO_PIN_0;
+        break;
+      case LL_GPIO_PIN_1:
+        SD_detect_gpio_pin = GPIO_PIN_1;
+        break;
+      case LL_GPIO_PIN_2:
+        SD_detect_gpio_pin = GPIO_PIN_2;
+        break;
+      case LL_GPIO_PIN_3:
+        SD_detect_gpio_pin = GPIO_PIN_3;
+        break;
+      case LL_GPIO_PIN_4:
+        SD_detect_gpio_pin = GPIO_PIN_4;
+        break;
+      case LL_GPIO_PIN_5:
+        SD_detect_gpio_pin = GPIO_PIN_5;
+        break;
+      case LL_GPIO_PIN_6:
+        SD_detect_gpio_pin = GPIO_PIN_6;
+        break;
+      case LL_GPIO_PIN_7:
+        SD_detect_gpio_pin = GPIO_PIN_7;
+        break;
+      case LL_GPIO_PIN_8:
+        SD_detect_gpio_pin = GPIO_PIN_8;
+        break;
+      case LL_GPIO_PIN_9:
+        SD_detect_gpio_pin = GPIO_PIN_9;
+        break;
+      case LL_GPIO_PIN_10:
+        SD_detect_gpio_pin = GPIO_PIN_10;
+        break;
+      case LL_GPIO_PIN_11:
+        SD_detect_gpio_pin = GPIO_PIN_11;
+        break;
+      case LL_GPIO_PIN_12:
+        SD_detect_gpio_pin = GPIO_PIN_12;
+        break;
+      case LL_GPIO_PIN_13:
+        SD_detect_gpio_pin = GPIO_PIN_13;
+        break;
+      case LL_GPIO_PIN_14:
+        SD_detect_gpio_pin = GPIO_PIN_14;
+        break;
+      case LL_GPIO_PIN_15:
+        SD_detect_gpio_pin = GPIO_PIN_15;
+        break;
+      default:
+        Error_Handler();
+        break;
     }
-  }
-  if (sd_state == MSD_OK) {
-    /* Enable and set SD detect EXTI Interrupt to the lowest priority */
-    HAL_NVIC_SetPriority(sd_detect_EXTI_IRQn, 0x0F, 0x00);
-    HAL_NVIC_EnableIRQ(sd_detect_EXTI_IRQn);
+    stm32_interrupt_enable(SD_detect_gpio_port, SD_detect_gpio_pin, callback, GPIO_MODE_IT_RISING_FALLING);
+    sd_state = MSD_OK;
   }
   return sd_state;
 }
@@ -246,13 +254,11 @@ uint8_t BSP_SD_DetectITConfig(void)
  */
 uint8_t BSP_SD_IsDetected(void)
 {
-  uint8_t  status = SD_PRESENT;
-
+  uint8_t  status = SD_NOT_PRESENT;
   /* Check SD card detect pin */
-  if (HAL_GPIO_ReadPin(SD_detect_gpio_port, SD_detect_gpio_pin) == GPIO_PIN_SET) {
-    status = SD_NOT_PRESENT;
+  if (!LL_GPIO_IsInputPinSet(SD_detect_gpio_port, SD_detect_ll_gpio_pin)) {
+    status = SD_PRESENT;
   }
-
   return status;
 }
 
@@ -371,14 +377,15 @@ __weak void BSP_SD_Detect_MspInit(SD_HandleTypeDef *hsd, void *Params)
 {
   UNUSED(hsd);
   UNUSED(Params);
-  GPIO_InitTypeDef  gpio_init_structure;
 
   /* GPIO configuration in input for uSD_Detect signal */
-  gpio_init_structure.Pin       = SD_detect_gpio_pin;
-  gpio_init_structure.Mode      = GPIO_MODE_INPUT;
-  gpio_init_structure.Pull      = GPIO_PULLUP;
-  gpio_init_structure.Speed     = SD_GPIO_SPEED;
-  HAL_GPIO_Init(SD_detect_gpio_port, &gpio_init_structure);
+#ifdef LL_GPIO_SPEED_FREQ_VERY_HIGH
+  LL_GPIO_SetPinSpeed(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_SPEED_FREQ_VERY_HIGH);
+#else
+  LL_GPIO_SetPinSpeed(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_SPEED_FREQ_HIGH);
+#endif
+  LL_GPIO_SetPinMode(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_MODE_INPUT);
+  LL_GPIO_SetPinPull(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_PULL_UP);
 }
 
 /**
