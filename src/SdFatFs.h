@@ -81,7 +81,7 @@ static inline uint8_t FAT_SECOND(uint16_t fatTime)
 class SdFatFs {
   public:
 
-    uint8_t init(void);
+    bool init(void);
 
     /** Return the FatFs type: 12, 16, 32 (0: unknown)*/
     uint8_t fatType(void);

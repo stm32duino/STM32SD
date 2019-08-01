@@ -39,9 +39,6 @@
 
 #include "bsp_sd.h"
 
-#define   FALSE      ((uint8_t)0x00)
-#define   TRUE       ((uint8_t)0x01)
-
 // card types to match Arduino definition
 #define SD_CARD_TYPE_UKN      0
 /** Standard capacity V1 SD card */
@@ -56,7 +53,7 @@
 class Sd2Card {
   public:
 
-    uint8_t init(uint32_t detectpin = SD_DETECT_NONE);
+    bool init(uint32_t detectpin = SD_DETECT_NONE);
 
     /** Return the card type: SD V1, SD V2 or SDHC */
     uint8_t type(void) const;

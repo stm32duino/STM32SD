@@ -60,59 +60,59 @@ SDClass SD;
   * @brief  Link SD, register the file system object to the FatFs mode and configure
   *         relatives SD IOs including SD Detect Pin if any
   * @param  None
-  * @retval TRUE or FALSE
+  * @retval true or false
   */
-uint8_t SDClass::begin(uint32_t detectpin)
+bool SDClass::begin(uint32_t detectpin)
 {
   /*##-1- Initializes SD IOs #############################################*/
   if (_card.init(detectpin)) {
     return _fatFs.init();
   }
-  return FALSE;
+  return false;
 }
 
 /**
   * @brief  Check if a file or folder exist on the SD disk
   * @param  filename: File name
-  * @retval TRUE or FALSE
+  * @retval true or false
   */
-uint8_t SDClass::exists(const char *filepath)
+bool SDClass::exists(const char *filepath)
 {
   FILINFO fno;
 
   if (f_stat(filepath, &fno) != FR_OK) {
-    return FALSE;
+    return false;
   } else {
-    return TRUE;
+    return true;
   }
 }
 
 /**
   * @brief  Create directory on the SD disk
   * @param  filename: File name
-  * @retval TRUE if created or existing else FALSE
+  * @retval true if created or existing else false
   */
-uint8_t SDClass::mkdir(const char *filepath)
+bool SDClass::mkdir(const char *filepath)
 {
   FRESULT res = f_mkdir(filepath);
   if ((res != FR_OK) && (res != FR_EXIST)) {
-    return FALSE;
+    return false;
   } else {
-    return TRUE;
+    return true;
   }
 }
 
 /**
   * @brief  Remove directory on the SD disk
   * @param  filename: File name
-  * @retval TRUE or FALSE
+  * @retval true or false
   */
-uint8_t SDClass::rmdir(const char *filepath)
+bool SDClass::rmdir(const char *filepath)
 {
   if (f_unlink(filepath) != FR_OK) {
-    return FALSE;
+    return false;
   } else {
-    return TRUE;
+    return true;
   }
 }
 
@@ -141,7 +141,7 @@ File SDClass::open(const char *filepath, uint8_t mode)
 {
   File file = File(filepath);
 
-  if ((mode == FILE_WRITE) && (SD.exists(filepath) != TRUE)) {
+  if ((mode == FILE_WRITE) && (!SD.exists(filepath))) {
     mode = mode | FA_CREATE_ALWAYS;
   }
 
@@ -154,14 +154,14 @@ File SDClass::open(const char *filepath, uint8_t mode)
 /**
   * @brief  Remove a file on the SD disk
   * @param  filename: File name
-  * @retval TRUE or FALSE
+  * @retval true or false
   */
-uint8_t SDClass::remove(const char *filepath)
+bool SDClass::remove(const char *filepath)
 {
   if (f_unlink(filepath) != FR_OK) {
-    return FALSE;
+    return false;
   } else {
-    return TRUE;
+    return true;
   }
 }
 
@@ -455,17 +455,17 @@ uint32_t File::position()
 /**
   * @brief  Seek to a new position in the file
   * @param  pos: The position to which to seek
-  * @retval TRUE or FALSE
+  * @retval true or false
   */
-uint8_t File::seek(uint32_t pos)
+bool File::seek(uint32_t pos)
 {
   if (pos > size()) {
-    return FALSE;
+    return false;
   } else {
     if (f_lseek(_fil, pos) != FR_OK) {
-      return FALSE;
+      return false;
     } else {
-      return TRUE;
+      return true;
     }
   }
 }
@@ -486,9 +486,9 @@ uint32_t File::size()
 File::operator bool()
 {
 #if _FATFS == 68300
-  return ((_name == NULL) || ((_fil == NULL) && (_dir.obj.fs == 0)) || ((_fil != NULL) && (_fil->obj.fs == 0) && (_dir.obj.fs == 0))) ? FALSE : TRUE;
+  return !((_name == NULL) || ((_fil == NULL) && (_dir.obj.fs == 0)) || ((_fil != NULL) && (_fil->obj.fs == 0) && (_dir.obj.fs == 0)));
 #else
-  return ((_name == NULL) || ((_fil == NULL) && (_dir.fs == 0)) || ((_fil != NULL) && (_fil->fs == 0) && (_dir.fs == 0))) ? FALSE : TRUE;
+  return !((_name == NULL) || ((_fil == NULL) && (_dir.fs == 0)) || ((_fil != NULL) && (_fil->fs == 0) && (_dir.fs == 0)));
 #endif
 }
 /**
@@ -584,7 +584,7 @@ char *File::name()
   * @brief  Check if the file is directory or normal file
   * @retval TRUE if directory else FALSE
   */
-uint8_t File::isDirectory()
+bool File::isDirectory()
 {
   FILINFO fno;
   if (_name == NULL) {
@@ -595,21 +595,21 @@ uint8_t File::isDirectory()
 #else
   if (_dir.fs != 0)
 #endif
-    return TRUE;
+    return true;
 #if _FATFS == 68300
   else if (_fil->obj.fs != 0)
 #else
   else if (_fil->fs != 0)
 #endif
-    return FALSE;
+    return false;
   // if not init get info
   if (f_stat(_name, &fno) == FR_OK) {
     if (fno.fattrib & AM_DIR) {
-      return TRUE;
+      return true;
     }
   }
   // Assume not a directory
-  return FALSE;
+  return false;
 }
 
 File File::openNextFile(uint8_t mode)

@@ -43,7 +43,7 @@ class File {
     virtual int available();
     virtual void flush();
     int read(void *buf, size_t len);
-    uint8_t seek(uint32_t pos);
+    bool seek(uint32_t pos);
     uint32_t position();
     uint32_t size();
     void close();
@@ -54,7 +54,7 @@ class File {
     {
       return _name;
     };
-    uint8_t isDirectory();
+    bool isDirectory();
     File openNextFile(uint8_t mode = FILE_READ);
     void rewindDirectory(void);
 
@@ -81,13 +81,13 @@ class SDClass {
   public:
 
     /* Initialize the SD peripheral */
-    uint8_t begin(uint32_t detectpin = SD_DETECT_NONE);
+    bool begin(uint32_t detectpin = SD_DETECT_NONE);
     static File open(const char *filepath, uint8_t mode);
     static File open(const char *filepath);
-    static uint8_t exists(const char *filepath);
-    static uint8_t mkdir(const char *filepath);
-    static uint8_t remove(const char *filepath);
-    static uint8_t rmdir(const char *filepath);
+    static bool exists(const char *filepath);
+    static bool mkdir(const char *filepath);
+    static bool remove(const char *filepath);
+    static bool rmdir(const char *filepath);
 
     File openRoot(void);
 

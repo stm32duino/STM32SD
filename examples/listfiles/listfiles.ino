@@ -29,7 +29,7 @@ void setup()
   }
 
   Serial.print("Initializing SD card...");
-  while (SD.begin(SD_DETECT_PIN) != TRUE)
+  while (!SD.begin(SD_DETECT_PIN))
   {
     delay(10);
   }

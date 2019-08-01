@@ -9,14 +9,14 @@
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
 #define BUFFERSIZE                       (COUNTOF(wtext) -1)
 
-uint32_t file_size = 0, seek_val = FALSE, peek_val = 0;
+uint32_t file_size = 0, seek_val = false, peek_val = 0;
 uint32_t byteswritten, bytesread = 0;
 /* File write buffer */
 uint8_t wtext[] =  "This is the Arduino SD Test working with FatFs.";
 /* File read buffer */
 uint8_t rtext[BUFFERSIZE];
 uint32_t i = 0;
-uint8_t isdir = FALSE;
+bool isdir = false;
 File MyFile;
 
 void setup()
@@ -25,7 +25,7 @@ void setup()
   while (!Serial);
 
   /* Test begin() method */
-  while (SD.begin(SD_DETECT_PIN) != TRUE)
+  while (!SD.begin(SD_DETECT_PIN))
   {
     delay(10);
   }
@@ -33,19 +33,19 @@ void setup()
 
   /* Test mkdir() method */
   Serial.print("Creating 'STM32' directory...");
-  if (SD.mkdir("STM32") == TRUE) {
+  if (SD.mkdir("STM32")) {
     Serial.println("OK");
   } else {
     Serial.println("KO");
   }
   Serial.print("Creating 'ARDUINO' directory...");
-  if (SD.mkdir("ARDUINO") == TRUE) {
+  if (SD.mkdir("ARDUINO")) {
     Serial.println("OK");
   } else {
     Serial.println("KO");
   }
   Serial.print("Creating 'ARDUINO/SD' directory...");
-  if (SD.mkdir("ARDUINO/SD") == TRUE) {
+  if (SD.mkdir("ARDUINO/SD")) {
     Serial.println("OK");
   } else {
     Serial.println("KO");
@@ -224,14 +224,14 @@ void setup()
   }
   /* Test exists(), remove() and rmdir() methods */
   Serial.print("Removing 'STM32/Toremove.txt' file...");
-  while (SD.exists("STM32/Toremove.txt") == TRUE)
+  while (SD.exists("STM32/Toremove.txt") == true)
   {
     SD.remove("STM32/Toremove.txt");
   }
   Serial.println("OK");
 
   Serial.print("Removing 'STM32' dir...");
-  while (SD.exists("STM32") == TRUE)
+  while (SD.exists("STM32") == true)
   {
     SD.rmdir("STM32");
   }
