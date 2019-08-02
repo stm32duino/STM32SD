@@ -26,7 +26,32 @@ This library provides a default user defined options file named `ffconf_default.
 User can provide his own defined options by adding his configuration in a file named
 `ffconf_custom.h` at sketch level or in variant folder.
 
-### SD detect and timeout
-* `SD_DETECT_PIN` pin number can be defined in `variant.h` or using `build_opt.h`.
+### SD
 
-* `SD_DATATIMEOUT` constant for Read/Write block could be redefined in `variant.h` or using `build_opt.h`
+Some default definitions can be overridden using:
+ * board `variant.h`
+ * `build_opt.h`: see [Customize build options](https://github.com/stm32duino/wiki/wiki/Customize-build-options-using-build_opt.h)
+
+ * `hal_conf_extra.h`: see [HAL configuration](https://github.com/stm32duino/wiki/wiki/HAL-configuration)
+
+
+#### SD configurations
+
+* `SD_INSTANCE`: some STM32 can have 2 SD peripherals `SDMMC1` and `SDMMC2`, note that this library can managed only one peripheral
+  * `SDMMC1` (default)
+  * `SDMMC2`
+
+* `SD_HW_FLOW_CTRL`: specifies whether the SDMMC hardware flow control is enabled or disabled
+  * `SD_HW_FLOW_CTRL_ENABLE`
+  * `SD_HW_FLOW_CTRL_DISABLE` (default)
+
+* `SD_BUS_WIDE`: specifies the SDMMC bus width
+  * `SD_BUS_WIDE_1B`
+  * `SD_BUS_WIDE_4B` (default)
+  * `SD_BUS_WIDE_8B`
+
+
+#### SD detect and timeout
+* `SD_DETECT_PIN` pin number
+
+* `SD_DATATIMEOUT` constant for Read/Write block

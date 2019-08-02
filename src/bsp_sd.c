@@ -39,40 +39,57 @@
 #include "PeripheralPins.h"
 #include "stm32yyxx_ll_gpio.h"
 
-#ifdef SDMMC1
 /* Definition for BSP SD */
-#define SD_INSTANCE            SDMMC1
-#define SD_CLK_ENABLE          __HAL_RCC_SDMMC1_CLK_ENABLE
-#define SD_CLK_DISABLE         __HAL_RCC_SDMMC1_CLK_DISABLE
-#define SD_CLK_EDGE            SDMMC_CLOCK_EDGE_RISING
-#define SD_CLK_BYPASS          SDMMC_CLOCK_BYPASS_DISABLE
-#define SD_CLK_PWR_SAVE        SDMMC_CLOCK_POWER_SAVE_DISABLE
-#define SD_BUS_WIDE_1B         SDMMC_BUS_WIDE_1B
-#define SD_BUS_WIDE_4B         SDMMC_BUS_WIDE_4B
-#ifndef SD_HW_FLOW_CTRL
-#define SD_HW_FLOW_CTRL        SDMMC_HARDWARE_FLOW_CONTROL_DISABLE
+#if defined(SDMMC1) || defined(SDMMC2)
+#ifndef SD_INSTANCE
+#define SD_INSTANCE              SDMMC1
 #endif
+
+#define SD_CLK_ENABLE            __HAL_RCC_SDMMC1_CLK_ENABLE
+#define SD_CLK_DISABLE           __HAL_RCC_SDMMC1_CLK_DISABLE
+#ifdef SDMMC2
+#define SD_CLK2_ENABLE            __HAL_RCC_SDMMC2_CLK_ENABLE
+#define SD_CLK2_DISABLE           __HAL_RCC_SDMMC2_CLK_DISABLE
+#endif
+
+#define SD_CLK_EDGE              SDMMC_CLOCK_EDGE_RISING
+#define SD_CLK_BYPASS            SDMMC_CLOCK_BYPASS_DISABLE
+#define SD_CLK_PWR_SAVE          SDMMC_CLOCK_POWER_SAVE_DISABLE
+#define SD_BUS_WIDE_1B           SDMMC_BUS_WIDE_1B
+#define SD_BUS_WIDE_4B           SDMMC_BUS_WIDE_4B
+#define SD_BUS_WIDE_8B           SDMMC_BUS_WIDE_8B
+#define SD_HW_FLOW_CTRL_ENABLE   SDMMC_HARDWARE_FLOW_CONTROL_ENABLE
+#define SD_HW_FLOW_CTRL_DISABLE  SDMMC_HARDWARE_FLOW_CONTROL_DISABLE
+
 #ifdef STM32H7xx
-#define SD_CLK_DIV             1
+#define SD_CLK_DIV               1
 #else
-#define SD_CLK_DIV             SDMMC_TRANSFER_CLK_DIV
+#define SD_CLK_DIV               SDMMC_TRANSFER_CLK_DIV
 #endif
+
 #elif defined(SDIO)
-/* Definition for BSP SD */
-#define SD_INSTANCE            SDIO
-#define SD_CLK_ENABLE          __HAL_RCC_SDIO_CLK_ENABLE
-#define SD_CLK_DISABLE         __HAL_RCC_SDIO_CLK_DISABLE
-#define SD_CLK_EDGE            SDIO_CLOCK_EDGE_RISING
-#define SD_CLK_BYPASS          SDIO_CLOCK_BYPASS_DISABLE
-#define SD_CLK_PWR_SAVE        SDIO_CLOCK_POWER_SAVE_DISABLE
-#define SD_BUS_WIDE_1B         SDIO_BUS_WIDE_1B
-#define SD_BUS_WIDE_4B         SDIO_BUS_WIDE_4B
-#ifndef SD_HW_FLOW_CTRL
-#define SD_HW_FLOW_CTRL        SDIO_HARDWARE_FLOW_CONTROL_DISABLE
-#endif
-#define SD_CLK_DIV             SDIO_TRANSFER_CLK_DIV
+#define SD_INSTANCE              SDIO
+#define SD_CLK_ENABLE            __HAL_RCC_SDIO_CLK_ENABLE
+#define SD_CLK_DISABLE           __HAL_RCC_SDIO_CLK_DISABLE
+#define SD_CLK_EDGE              SDIO_CLOCK_EDGE_RISING
+#define SD_CLK_BYPASS            SDIO_CLOCK_BYPASS_DISABLE
+#define SD_CLK_PWR_SAVE          SDIO_CLOCK_POWER_SAVE_DISABLE
+#define SD_BUS_WIDE_1B           SDIO_BUS_WIDE_1B
+#define SD_BUS_WIDE_4B           SDIO_BUS_WIDE_4B
+#define SD_BUS_WIDE_8B           SDIO_BUS_WIDE_8B
+#define SD_HW_FLOW_CTRL_ENABLE   SDIO_HARDWARE_FLOW_CONTROL_ENABLE
+#define SD_HW_FLOW_CTRL_DISABLE  SDIO_HARDWARE_FLOW_CONTROL_DISABLE
+#define SD_CLK_DIV               SDIO_TRANSFER_CLK_DIV
 #else
 #error "Unknown SD_INSTANCE"
+#endif
+
+#ifndef SD_HW_FLOW_CTRL
+#define SD_HW_FLOW_CTRL          SD_HW_FLOW_CTRL_DISABLE
+#endif
+
+#ifndef SD_BUS_WIDE
+#define SD_BUS_WIDE              SD_BUS_WIDE_4B
 #endif
 
 /* BSP SD Private Variables */
@@ -132,7 +149,7 @@ uint8_t BSP_SD_Init(void)
   /* Configure SD Bus width */
   if (sd_state == MSD_OK) {
     /* Enable wide operation */
-    if (HAL_SD_WideBusOperation_Config(&uSdHandle, SD_BUS_WIDE_4B) != SD_OK) {
+    if (HAL_SD_WideBusOperation_Config(&uSdHandle, SD_BUS_WIDE) != SD_OK) {
       sd_state = MSD_ERROR;
     } else {
       sd_state = MSD_OK;
@@ -157,7 +174,6 @@ uint8_t BSP_SD_DeInit(void)
   }
 
   /* Msp SD deinitialization */
-  uSdHandle.Instance = SD_INSTANCE;
   BSP_SD_MspDeInit(&uSdHandle, NULL);
 
   return  sd_state;
@@ -354,7 +370,6 @@ uint8_t BSP_SD_Erase(uint64_t StartAddr, uint64_t EndAddr)
   */
 __weak void BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params)
 {
-  UNUSED(hsd);
   UNUSED(Params);
 
   /* Configure SD GPIOs */
@@ -364,8 +379,17 @@ __weak void BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params)
     map++;
   }
 
-  /* Enable SDIO clock */
+  /* Enable SD clock */
+#if defined(SDMMC1) && defined(SDMMC2)
+  if (hsd->Instance == SDMMC1) {
+    SD_CLK_ENABLE();
+  } else {
+    SD_CLK2_ENABLE();
+  }
+#else
+  UNUSED(hsd);
   SD_CLK_ENABLE();
+#endif
 }
 
 /**
@@ -395,14 +419,22 @@ __weak void BSP_SD_Detect_MspInit(SD_HandleTypeDef *hsd, void *Params)
   */
 __weak void BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params)
 {
-  UNUSED(hsd);
   UNUSED(Params);
 
   /* DeInit GPIO pins can be done in the application
      (by surcharging this __weak function) */
 
-  /* Disable SDIO clock */
+  /* Disable SD clock */
+#if defined(SDMMC1) && defined(SDMMC2)
+  if (hsd->Instance == SDMMC1) {
+    SD_CLK_DISABLE();
+  } else {
+    SD_CLK2_DISABLE();
+  }
+#else
+  UNUSED(hsd);
   SD_CLK_DISABLE();
+#endif
 }
 
 #ifndef STM32L1xx
