@@ -67,6 +67,11 @@
 #define SD_CLK_DIV               SDMMC_TRANSFER_CLK_DIV
 #endif
 
+#ifdef SDMMC_TRANSCEIVER_ENABLE
+#define SD_TRANSCEIVER_ENABLE    SDMMC_TRANSCEIVER_ENABLE
+#define SD_TRANSCEIVER_DISABLE   SDMMC_TRANSCEIVER_DISABLE
+#endif
+
 #elif defined(SDIO)
 #define SD_INSTANCE              SDIO
 #define SD_CLK_ENABLE            __HAL_RCC_SDIO_CLK_ENABLE
@@ -92,10 +97,20 @@
 #define SD_BUS_WIDE              SD_BUS_WIDE_4B
 #endif
 
+#if defined(SDMMC_TRANSCEIVER_ENABLE) && !defined(SD_TRANSCEIVER_MODE)
+#define SD_TRANSCEIVER_MODE      SD_TRANSCEIVER_DISABLE
+#endif
+
 /* BSP SD Private Variables */
 static SD_HandleTypeDef uSdHandle;
 static uint32_t SD_detect_ll_gpio_pin = LL_GPIO_PIN_ALL;
 static GPIO_TypeDef *SD_detect_gpio_port = GPIOA;
+#ifdef SDMMC_TRANSCEIVER_ENABLE
+static uint32_t SD_trans_en_ll_gpio_pin = LL_GPIO_PIN_ALL;
+static GPIO_TypeDef *SD_trans_en_gpio_port = GPIOA;
+static uint32_t SD_trans_sel_ll_gpio_pin = LL_GPIO_PIN_ALL;
+static GPIO_TypeDef *SD_trans_sel_gpio_port = GPIOA;
+#endif
 #ifndef STM32L1xx
 #define SD_OK                         HAL_OK
 #define SD_TRANSFER_OK                ((uint8_t)0x00)
@@ -124,6 +139,13 @@ uint8_t BSP_SD_Init(void)
   uSdHandle.Init.BusWide             = SD_BUS_WIDE_1B;
   uSdHandle.Init.HardwareFlowControl = SD_HW_FLOW_CTRL;
   uSdHandle.Init.ClockDiv            = SD_CLK_DIV;
+#ifdef SDMMC_TRANSCEIVER_ENABLE
+  uSdHandle.Init.Transceiver = SD_TRANSCEIVER_MODE;
+  if (SD_TRANSCEIVER_MODE == SD_TRANSCEIVER_ENABLE) {
+
+    BSP_SD_Transceiver_MspInit(&uSdHandle, NULL);
+  }
+#endif
 
   if (SD_detect_ll_gpio_pin != LL_GPIO_PIN_ALL) {
     /* Msp SD Detect pin initialization */
@@ -178,6 +200,26 @@ uint8_t BSP_SD_DeInit(void)
 
   return  sd_state;
 }
+
+#ifdef SDMMC_TRANSCEIVER_ENABLE
+/**
+  * @brief  Set the SD card device detect pin and port.
+  * @param  port one of the gpio port
+  * @param  pin one of the gpio pin
+  * @retval SD status
+  */
+uint8_t BSP_SD_TransceiverPin(GPIO_TypeDef *enport, uint32_t enpin, GPIO_TypeDef *selport, uint32_t selpin)
+{
+  if ((enport != 0) && (selport != 0)) {
+    SD_trans_en_ll_gpio_pin = enpin;
+    SD_trans_en_gpio_port = enport;
+    SD_trans_sel_ll_gpio_pin = selpin;
+    SD_trans_sel_gpio_port = selport;
+    return MSD_OK;
+  }
+  return MSD_ERROR;
+}
+#endif
 
 /**
   * @brief  Set the SD card device detect pin and port.
@@ -436,6 +478,47 @@ __weak void BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params)
   SD_CLK_DISABLE();
 #endif
 }
+
+#ifdef SDMMC_TRANSCEIVER_ENABLE
+/**
+  * @brief  Initializes the SD Transceiver pin MSP.
+  * @param  hsd: SD handle
+  * @param  Params : pointer on additional configuration parameters, can be NULL.
+  */
+__weak void BSP_SD_Transceiver_MspInit(SD_HandleTypeDef *hsd, void *Params)
+{
+  UNUSED(hsd);
+  UNUSED(Params);
+
+  LL_GPIO_SetPinSpeed(SD_trans_en_gpio_port, SD_trans_en_ll_gpio_pin, LL_GPIO_SPEED_FREQ_HIGH);
+  LL_GPIO_SetPinMode(SD_trans_en_gpio_port, SD_trans_en_ll_gpio_pin, LL_GPIO_MODE_OUTPUT);
+  LL_GPIO_SetPinPull(SD_trans_en_gpio_port, SD_trans_en_ll_gpio_pin, LL_GPIO_PULL_NO);
+
+  LL_GPIO_SetPinSpeed(SD_trans_sel_gpio_port, SD_trans_sel_ll_gpio_pin, LL_GPIO_SPEED_FREQ_HIGH);
+  LL_GPIO_SetPinMode(SD_trans_sel_gpio_port, SD_trans_sel_ll_gpio_pin, LL_GPIO_MODE_OUTPUT);
+  LL_GPIO_SetPinPull(SD_trans_sel_gpio_port, SD_trans_sel_ll_gpio_pin, LL_GPIO_PULL_NO);
+
+  /* Enable the level shifter */
+  LL_GPIO_SetOutputPin(SD_trans_en_gpio_port, SD_trans_en_ll_gpio_pin);
+
+  /* By default start with the default voltage */
+  LL_GPIO_ResetOutputPin(SD_trans_sel_gpio_port, SD_trans_sel_ll_gpio_pin);
+}
+
+/**
+  * @brief  Enable/Disable the SD Transceiver 1.8V Mode Callback.
+  * @param  status: Voltage Switch State
+  * @retval None
+  */
+void HAL_SDEx_DriveTransceiver_1_8V_Callback(FlagStatus status)
+{
+  if (status == SET) {
+    LL_GPIO_SetOutputPin(SD_trans_sel_gpio_port, SD_trans_sel_ll_gpio_pin);
+  } else {
+    LL_GPIO_ResetOutputPin(SD_trans_sel_gpio_port, SD_trans_sel_ll_gpio_pin);
+  }
+}
+#endif /* SDMMC_TRANSCEIVER_ENABLE */
 
 #ifndef STM32L1xx
 /**

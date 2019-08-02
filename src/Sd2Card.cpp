@@ -47,6 +47,14 @@ bool Sd2Card::init(uint32_t detectpin)
       return false;
     }
   }
+#ifdef SDMMC_TRANSCEIVER_ENABLE
+  PinName sd_en = digitalPinToPinName(SD_TRANSCEIVER_EN);
+  PinName sd_sel = digitalPinToPinName(SD_TRANSCEIVER_SEL);
+  BSP_SD_TransceiverPin(set_GPIO_Port_Clock(STM_PORT(sd_en)),
+                        STM_LL_GPIO_PIN(sd_en),
+                        set_GPIO_Port_Clock(STM_PORT(sd_sel)),
+                        STM_LL_GPIO_PIN(sd_sel));
+#endif
   if (BSP_SD_Init() == MSD_OK) {
     BSP_SD_GetCardInfo(&_SdCardInfo);
     return true;

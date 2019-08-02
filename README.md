@@ -50,6 +50,14 @@ Some default definitions can be overridden using:
   * `SD_BUS_WIDE_4B` (default)
   * `SD_BUS_WIDE_8B`
 
+#### SD Transceiver
+
+* `SD_TRANSCEIVER_MODE`: specifies whether external Transceiver is enabled or disabled. Available only on some STM32
+  * `SDMMC_TRANSCEIVER_ENABLE`
+  * `SDMMC_TRANSCEIVER_DISABLE` (default)
+
+* `SD_TRANSCEIVER_EN` pin number to enable the level shifter
+* `SD_TRANSCEIVER_SEL` pin number for voltage selection
 
 #### SD detect and timeout
 * `SD_DETECT_PIN` pin number

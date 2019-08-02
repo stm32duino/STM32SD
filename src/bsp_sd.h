@@ -52,10 +52,6 @@ extern "C" {
 #error "This library version required a STM32 core version > 1.6.1.\
 Please update the core or install previous libray version."
 #endif
-/* Could be redefined in variant.h or using build_opt.h */
-#ifndef SD_DATATIMEOUT
-#define SD_DATATIMEOUT         100000000U
-#endif
 
 /*SD Card information structure */
 #ifndef STM32L1xx
@@ -76,10 +72,31 @@ Please update the core or install previous libray version."
 #define SD_PRESENT               ((uint8_t)0x01)
 #define SD_NOT_PRESENT           ((uint8_t)0x00)
 #define SD_DETECT_NONE           NUM_DIGITAL_PINS
+#ifdef SDMMC_TRANSCEIVER_ENABLE
+#define SD_TRANSCEIVER_NONE      NUM_DIGITAL_PINS
+#endif
+
+/* Could be redefined in variant.h or using build_opt.h */
+#ifndef SD_DATATIMEOUT
+#define SD_DATATIMEOUT         100000000U
+#endif
+
+#ifdef SDMMC_TRANSCEIVER_ENABLE
+#ifndef SD_TRANSCEIVER_EN
+#define SD_TRANSCEIVER_EN      SD_TRANSCEIVER_NONE
+#endif
+
+#ifndef SD_TRANSCEIVER_SEL
+#define SD_TRANSCEIVER_SEL     SD_TRANSCEIVER_NONE
+#endif
+#endif
 
 /* SD Exported Functions */
 uint8_t BSP_SD_Init(void);
 uint8_t BSP_SD_DeInit(void);
+#ifdef SDMMC_TRANSCEIVER_ENABLE
+uint8_t BSP_SD_TransceiverPin(GPIO_TypeDef *enport, uint32_t enpin, GPIO_TypeDef *selport, uint32_t selpin);
+#endif
 uint8_t BSP_SD_DetectPin(GPIO_TypeDef *port, uint32_t pin);
 uint8_t BSP_SD_DetectITConfig(void (*callback)(void));
 #ifndef STM32L1xx
@@ -103,6 +120,9 @@ uint8_t BSP_SD_IsDetected(void);
 void    BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params);
 void    BSP_SD_Detect_MspInit(SD_HandleTypeDef *hsd, void *Params);
 void    BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params);
+#ifdef SDMMC_TRANSCEIVER_ENABLE
+void    BSP_SD_Transceiver_MspInit(SD_HandleTypeDef *hsd, void *Params);
+#endif
 
 #ifdef __cplusplus
 }
