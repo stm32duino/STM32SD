@@ -74,5 +74,9 @@ void loop()
     // print to the serial port too:
     Serial.println(dataString);
   }
+  // if the file isn't open, pop up an error:
+  else {
+    Serial.println("error on datalog.txt file handle");
+  }
   delay(100);
 }
