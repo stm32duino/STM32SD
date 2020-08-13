@@ -20,6 +20,8 @@
 
 uint32_t A[] = { A0, A1, A2};
 
+File dataFile;
+
 void setup()
 {
   // Open serial communications and wait for port to open:
@@ -36,6 +38,18 @@ void setup()
   }
   delay(100);
   Serial.println("card initialized.");
+
+  // open the file. note that only one file can be open at a time,
+  // so you have to close this one before opening another.
+  dataFile = SD.open("datalog.txt", FILE_WRITE);
+  // if the file is available, seek to last position
+  if (dataFile) {
+    dataFile.seek(dataFile.size());
+  }
+  // if the file isn't open, pop up an error:
+  else {
+    Serial.println("error opening datalog.txt");
+  }
 }
 
 void loop()
@@ -52,21 +66,17 @@ void loop()
     }
   }
 
-  // open the file. note that only one file can be open at a time,
-  // so you have to close this one before opening another.
-  File dataFile = SD.open("datalog.txt", FILE_WRITE);
 
   // if the file is available, write to it:
   if (dataFile) {
-    dataFile.seek(dataFile.size());
     dataFile.println(dataString);
-    dataFile.close();
+    dataFile.flush(); // use flush to ensure the data written
     // print to the serial port too:
     Serial.println(dataString);
   }
   // if the file isn't open, pop up an error:
   else {
-    Serial.println("error opening datalog.txt");
+    Serial.println("error on datalog.txt file handle");
   }
   delay(100);
 }
