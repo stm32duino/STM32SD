@@ -9,6 +9,9 @@
 
  This example code is in the public domain.
 
+ If the directorys are only listed up to the second level increase `#define _FS_LOCK  2`
+ in 'ffconf_custom.h' at scetch level. You may have to create it.
+
  */
 #include <STM32SD.h>
 
