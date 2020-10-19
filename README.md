@@ -2,6 +2,8 @@
 
 With an STM32 board with SD card slot availability, this library enables
 reading and writing on SD card using SD card slot of a STM32 board (NUCLEO, DISCOVERY, ...).
+This library is for SD card slots connected to the SDIO-/SDMMC-hardware of the processor.
+For slots connected to SPI-hardware use the standard Arduino SD library.
 
 This library follow Arduino API.
 
