@@ -119,34 +119,43 @@ bool SDClass::rmdir(const char *filepath)
 /**
   * @brief  Open a file on the SD disk, if not existing it's created
   * @param  filename: File name
-  * @retval File object referring to the opened file
-  */
-File SDClass::open(const char *filepath)
-{
-  File file = File(filepath);
-
-  if (f_open(file._fil, filepath, FA_READ) != FR_OK) {
-    f_opendir(&file._dir, filepath);
-  }
-  return file;
-}
-
-/**
-  * @brief  Open a file on the SD disk, if not existing it's created
-  * @param  filename: File name
   * @param  mode: the mode in which to open the file
   * @retval File object referring to the opened file
   */
-File SDClass::open(const char *filepath, uint8_t mode)
+File SDClass::open(const char *filepath, uint8_t mode /* = FA_READ */)
 {
-  File file = File(filepath);
+  File file = File();
 
+  file._name = (char *)malloc(strlen(filepath) + 1);
+  if (file._name == NULL) {
+    Error_Handler();
+  }
+  sprintf(file._name, "%s", filepath);
+
+  file._fil = (FIL *)malloc(sizeof(FIL));
+  if (file._fil == NULL) {
+    Error_Handler();
+  }
+
+#if _FATFS == 68300
+  file._fil->obj.fs = 0;
+  file._dir.obj.fs = 0;
+#else
+  file._fil->fs = 0;
+  file._dir.fs = 0;
+#endif
+  
   if ((mode == FILE_WRITE) && (!SD.exists(filepath))) {
     mode = mode | FA_CREATE_ALWAYS;
   }
 
   if (f_open(file._fil, filepath, mode) != FR_OK) {
-    f_opendir(&file._dir, filepath);
+    free(file._fil);
+    file._fil = NULL;
+    if (f_opendir(&file._dir, filepath) != FR_OK) {
+      free(file._name);
+      file._name = NULL;
+    }
   }
   return file;
 }
@@ -167,52 +176,13 @@ bool SDClass::remove(const char *filepath)
 
 File SDClass::openRoot(void)
 {
-  File file = File(_fatFs.getRoot());
-
-  if (f_opendir(&file._dir, _fatFs.getRoot()) != FR_OK) {
-#if _FATFS == 68300
-    file._dir.obj.fs = 0;
-#else
-    file._dir.fs = 0;
-#endif
-  }
-  return file;
+  return open(_fatFs.getRoot());
 }
 
 File::File()
 {
   _name = NULL;
-  _fil = (FIL *)malloc(sizeof(FIL));
-  if (_fil == NULL) {
-    Error_Handler();
-  }
-#if _FATFS == 68300
-  _fil->obj.fs = 0;
-  _dir.obj.fs = 0;
-#else
-  _fil->fs = 0;
-  _dir.fs = 0;
-#endif
-}
-
-File::File(const char *name)
-{
-  _name = (char *)malloc(strlen(name) + 1);
-  if (_name == NULL) {
-    Error_Handler();
-  }
-  sprintf(_name, "%s", name);
-  _fil = (FIL *)malloc(sizeof(FIL));
-  if (_fil == NULL) {
-    Error_Handler();
-  }
-#if _FATFS == 68300
-  _fil->obj.fs = 0;
-  _dir.obj.fs = 0;
-#else
-  _fil->fs = 0;
-  _dir.fs = 0;
-#endif
+  _fil = NULL;
 }
 
 /** List directory contents to Serial.
@@ -617,9 +587,6 @@ File File::openNextFile(uint8_t mode)
   FRESULT res = FR_OK;
   FILINFO fno;
   char *fn;
-  char *fullPath = NULL;
-  size_t name_len = strlen(_name);
-  size_t len = name_len;
 #if _USE_LFN && _FATFS != 68300
   static char lfn[_MAX_LFN];
   fno.lfname = lfn;
@@ -638,8 +605,8 @@ File File::openNextFile(uint8_t mode)
 #else
     fn = fno.fname;
 #endif
-    len += strlen(fn) + 2;
-    fullPath = (char *)malloc(len);
+    size_t name_len = strlen(_name);
+    char *fullPath = (char *)malloc(name_len + strlen(fn) + 2);
     if (fullPath != NULL) {
       // Avoid twice '/'
       if ((name_len > 0)  && (_name[name_len - 1] == '/')) {
