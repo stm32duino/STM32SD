@@ -33,7 +33,6 @@ uint8_t const LS_R = 4;
 class File {
   public:
     File(void);
-    File(const char *name);
     virtual size_t write(uint8_t);
     virtual size_t write(const uint8_t *buf, size_t size);
     virtual size_t write(const char *buf, size_t size);
@@ -82,8 +81,7 @@ class SDClass {
 
     /* Initialize the SD peripheral */
     bool begin(uint32_t detectpin = SD_DETECT_NONE);
-    static File open(const char *filepath, uint8_t mode);
-    static File open(const char *filepath);
+    static File open(const char *filepath, uint8_t mode = FA_READ);
     static bool exists(const char *filepath);
     static bool mkdir(const char *filepath);
     static bool remove(const char *filepath);
