@@ -32,7 +32,7 @@ uint8_t const LS_R = 4;
 
 class File {
   public:
-    File(void);
+    File(FRESULT res = FR_OK);
     virtual size_t write(uint8_t);
     virtual size_t write(const uint8_t *buf, size_t size);
     virtual size_t write(const char *buf, size_t size);
@@ -72,6 +72,9 @@ class File {
     char *_name = NULL; //file or dir name
     FIL *_fil = NULL; // underlying file object structure pointer
     DIR _dir = {}; // init all fields to 0
+    FRESULT _res = FR_OK;
+
+    FRESULT getErrorstate(void) {return _res;}
 
 };
 
