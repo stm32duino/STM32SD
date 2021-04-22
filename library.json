@@ -1,0 +1,16 @@
+{
+  "name": "STM32SD",
+  "keywords": "Data Storage",
+  "description": "Arduino library to support SD card using SD card slot connected to the SDIO/SDMMC-hardware of the STM32 MCU.",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/stm32duino/STM32SD"
+  },
+  "version": "1.2.3",
+  "frameworks": "arduino",
+  "platforms": "ststm32",
+  "build": {
+    "libArchive": false
+  }
+}
