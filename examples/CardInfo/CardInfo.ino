@@ -84,6 +84,7 @@ void setup()
 
   // list all files in the card with date and size
   root.ls(LS_R | LS_DATE | LS_SIZE);
+  root.close();
   Serial.println("###### End of the SD tests ######");
 }
 
