@@ -210,7 +210,7 @@
 /  number and only an FAT volume found on the physical drive will be mounted.
 /  When multi-partition is enabled (1), each logical drive number can be bound to
 /  arbitrary physical drive and partition listed in the VolToPart[]. Also f_fdisk()
-/  funciton will be available. */
+/  function will be available. */
 
 
 #define _MIN_SS   512
@@ -287,9 +287,9 @@
 #define _FS_REENTRANT 0
 
 #if _FS_REENTRANT
-#include "cmsis_os.h"
-#define _FS_TIMEOUT   1000
-#define _SYNC_t         osSemaphoreId
+  #include "cmsis_os.h"
+  #define _FS_TIMEOUT   1000
+  #define _SYNC_t         osSemaphoreId
 #endif
 /* The option _FS_REENTRANT switches the re-entrancy (thread safe) of the FatFs
 /  module itself. Note that regardless of this option, file access to different
@@ -311,16 +311,16 @@
 /* #include <windows.h> // O/S definitions  */
 
 #if _USE_LFN == 3
-#if !defined(ff_malloc) || !defined(ff_free)
-#include <stdlib.h>
-#endif
+  #if !defined(ff_malloc) || !defined(ff_free)
+    #include <stdlib.h>
+  #endif
 
-#if !defined(ff_malloc)
-#define ff_malloc malloc
-#endif
+  #if !defined(ff_malloc)
+    #define ff_malloc malloc
+  #endif
 
-#if !defined(ff_free)
-#define ff_free free
-#endif
+  #if !defined(ff_free)
+    #define ff_free free
+  #endif
 #endif
 /*--- End of configuration options ---*/

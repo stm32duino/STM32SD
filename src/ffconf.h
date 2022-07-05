@@ -10,12 +10,12 @@
 
 /* FatFs specific configuration options. */
 #if __has_include("ffconf_custom.h")
-#include "ffconf_custom.h"
+  #include "ffconf_custom.h"
 #else
-#if _FATFS == 68300
-#include "ffconf_default_68300.h"
-#else
-#include "ffconf_default_32020.h"
-#endif
+  #if _FATFS == 68300
+    #include "ffconf_default_68300.h"
+  #else
+    #include "ffconf_default_32020.h"
+  #endif
 #endif
 #endif /* _ARDUINO_FFCONF_H */

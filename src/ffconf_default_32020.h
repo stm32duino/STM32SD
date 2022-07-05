@@ -179,7 +179,7 @@
 /  option to 1 and f_getfree() function at first time after volume mount will
 /  force a full FAT scan.
 /
-/  0: Load all informations in the FSINFO if available.
+/  0: Load all information in the FSINFO if available.
 /  1: Do not trust free cluster count in the FSINFO.
 */
 
@@ -236,7 +236,7 @@
 /� These options have no effect at read-only configuration (_FS_READONLY == 1). */
 
 #if _NORTC_YEAR < 1980 || _NORTC_YEAR > 2107 || _NORTC_MON < 1 || _NORTC_MON > 12 || _NORTC_MDAY < 1 || _NORTC_MDAY > 31
-#error Invalid _FS_NORTC settings
+  #error Invalid _FS_NORTC settings
 #endif
 
 #endif /* _FFCONFIG */

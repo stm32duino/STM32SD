@@ -41,64 +41,64 @@
 
 /* Definition for BSP SD */
 #if defined(SDMMC1) || defined(SDMMC2)
-#ifndef SD_INSTANCE
-#define SD_INSTANCE              SDMMC1
-#endif
+  #ifndef SD_INSTANCE
+    #define SD_INSTANCE              SDMMC1
+  #endif
 
-#define SD_CLK_ENABLE            __HAL_RCC_SDMMC1_CLK_ENABLE
-#define SD_CLK_DISABLE           __HAL_RCC_SDMMC1_CLK_DISABLE
-#ifdef SDMMC2
-#define SD_CLK2_ENABLE            __HAL_RCC_SDMMC2_CLK_ENABLE
-#define SD_CLK2_DISABLE           __HAL_RCC_SDMMC2_CLK_DISABLE
-#endif
+  #define SD_CLK_ENABLE            __HAL_RCC_SDMMC1_CLK_ENABLE
+  #define SD_CLK_DISABLE           __HAL_RCC_SDMMC1_CLK_DISABLE
+  #ifdef SDMMC2
+    #define SD_CLK2_ENABLE            __HAL_RCC_SDMMC2_CLK_ENABLE
+    #define SD_CLK2_DISABLE           __HAL_RCC_SDMMC2_CLK_DISABLE
+  #endif
 
-#define SD_CLK_EDGE              SDMMC_CLOCK_EDGE_RISING
-#define SD_CLK_BYPASS            SDMMC_CLOCK_BYPASS_DISABLE
-#define SD_CLK_PWR_SAVE          SDMMC_CLOCK_POWER_SAVE_DISABLE
-#define SD_BUS_WIDE_1B           SDMMC_BUS_WIDE_1B
-#define SD_BUS_WIDE_4B           SDMMC_BUS_WIDE_4B
-#define SD_BUS_WIDE_8B           SDMMC_BUS_WIDE_8B
-#define SD_HW_FLOW_CTRL_ENABLE   SDMMC_HARDWARE_FLOW_CONTROL_ENABLE
-#define SD_HW_FLOW_CTRL_DISABLE  SDMMC_HARDWARE_FLOW_CONTROL_DISABLE
+  #define SD_CLK_EDGE              SDMMC_CLOCK_EDGE_RISING
+  #define SD_CLK_BYPASS            SDMMC_CLOCK_BYPASS_DISABLE
+  #define SD_CLK_PWR_SAVE          SDMMC_CLOCK_POWER_SAVE_DISABLE
+  #define SD_BUS_WIDE_1B           SDMMC_BUS_WIDE_1B
+  #define SD_BUS_WIDE_4B           SDMMC_BUS_WIDE_4B
+  #define SD_BUS_WIDE_8B           SDMMC_BUS_WIDE_8B
+  #define SD_HW_FLOW_CTRL_ENABLE   SDMMC_HARDWARE_FLOW_CONTROL_ENABLE
+  #define SD_HW_FLOW_CTRL_DISABLE  SDMMC_HARDWARE_FLOW_CONTROL_DISABLE
 
-#ifdef STM32H7xx
-#define SD_CLK_DIV               1
-#else
-#define SD_CLK_DIV               SDMMC_TRANSFER_CLK_DIV
-#endif
+  #ifdef STM32H7xx
+    #define SD_CLK_DIV               1
+  #else
+    #define SD_CLK_DIV               SDMMC_TRANSFER_CLK_DIV
+  #endif
 
-#ifdef SDMMC_TRANSCEIVER_ENABLE
-#define SD_TRANSCEIVER_ENABLE    SDMMC_TRANSCEIVER_ENABLE
-#define SD_TRANSCEIVER_DISABLE   SDMMC_TRANSCEIVER_DISABLE
-#endif
+  #ifdef SDMMC_TRANSCEIVER_ENABLE
+    #define SD_TRANSCEIVER_ENABLE    SDMMC_TRANSCEIVER_ENABLE
+    #define SD_TRANSCEIVER_DISABLE   SDMMC_TRANSCEIVER_DISABLE
+  #endif
 
 #elif defined(SDIO)
-#define SD_INSTANCE              SDIO
-#define SD_CLK_ENABLE            __HAL_RCC_SDIO_CLK_ENABLE
-#define SD_CLK_DISABLE           __HAL_RCC_SDIO_CLK_DISABLE
-#define SD_CLK_EDGE              SDIO_CLOCK_EDGE_RISING
-#define SD_CLK_BYPASS            SDIO_CLOCK_BYPASS_DISABLE
-#define SD_CLK_PWR_SAVE          SDIO_CLOCK_POWER_SAVE_DISABLE
-#define SD_BUS_WIDE_1B           SDIO_BUS_WIDE_1B
-#define SD_BUS_WIDE_4B           SDIO_BUS_WIDE_4B
-#define SD_BUS_WIDE_8B           SDIO_BUS_WIDE_8B
-#define SD_HW_FLOW_CTRL_ENABLE   SDIO_HARDWARE_FLOW_CONTROL_ENABLE
-#define SD_HW_FLOW_CTRL_DISABLE  SDIO_HARDWARE_FLOW_CONTROL_DISABLE
-#define SD_CLK_DIV               SDIO_TRANSFER_CLK_DIV
+  #define SD_INSTANCE              SDIO
+  #define SD_CLK_ENABLE            __HAL_RCC_SDIO_CLK_ENABLE
+  #define SD_CLK_DISABLE           __HAL_RCC_SDIO_CLK_DISABLE
+  #define SD_CLK_EDGE              SDIO_CLOCK_EDGE_RISING
+  #define SD_CLK_BYPASS            SDIO_CLOCK_BYPASS_DISABLE
+  #define SD_CLK_PWR_SAVE          SDIO_CLOCK_POWER_SAVE_DISABLE
+  #define SD_BUS_WIDE_1B           SDIO_BUS_WIDE_1B
+  #define SD_BUS_WIDE_4B           SDIO_BUS_WIDE_4B
+  #define SD_BUS_WIDE_8B           SDIO_BUS_WIDE_8B
+  #define SD_HW_FLOW_CTRL_ENABLE   SDIO_HARDWARE_FLOW_CONTROL_ENABLE
+  #define SD_HW_FLOW_CTRL_DISABLE  SDIO_HARDWARE_FLOW_CONTROL_DISABLE
+  #define SD_CLK_DIV               SDIO_TRANSFER_CLK_DIV
 #else
-#error "Unknown SD_INSTANCE"
+  #error "Unknown SD_INSTANCE"
 #endif
 
 #ifndef SD_HW_FLOW_CTRL
-#define SD_HW_FLOW_CTRL          SD_HW_FLOW_CTRL_DISABLE
+  #define SD_HW_FLOW_CTRL          SD_HW_FLOW_CTRL_DISABLE
 #endif
 
 #ifndef SD_BUS_WIDE
-#define SD_BUS_WIDE              SD_BUS_WIDE_4B
+  #define SD_BUS_WIDE              SD_BUS_WIDE_4B
 #endif
 
 #if defined(SDMMC_TRANSCEIVER_ENABLE) && !defined(SD_TRANSCEIVER_MODE)
-#define SD_TRANSCEIVER_MODE      SD_TRANSCEIVER_DISABLE
+  #define SD_TRANSCEIVER_MODE      SD_TRANSCEIVER_DISABLE
 #endif
 
 /* BSP SD Private Variables */
@@ -106,17 +106,17 @@ static SD_HandleTypeDef uSdHandle;
 static uint32_t SD_detect_ll_gpio_pin = LL_GPIO_PIN_ALL;
 static GPIO_TypeDef *SD_detect_gpio_port = GPIOA;
 #ifdef SDMMC_TRANSCEIVER_ENABLE
-static uint32_t SD_trans_en_ll_gpio_pin = LL_GPIO_PIN_ALL;
-static GPIO_TypeDef *SD_trans_en_gpio_port = GPIOA;
-static uint32_t SD_trans_sel_ll_gpio_pin = LL_GPIO_PIN_ALL;
-static GPIO_TypeDef *SD_trans_sel_gpio_port = GPIOA;
+  static uint32_t SD_trans_en_ll_gpio_pin = LL_GPIO_PIN_ALL;
+  static GPIO_TypeDef *SD_trans_en_gpio_port = GPIOA;
+  static uint32_t SD_trans_sel_ll_gpio_pin = LL_GPIO_PIN_ALL;
+  static GPIO_TypeDef *SD_trans_sel_gpio_port = GPIOA;
 #endif
 #ifndef STM32L1xx
-#define SD_OK                         HAL_OK
-#define SD_TRANSFER_OK                ((uint8_t)0x00)
-#define SD_TRANSFER_BUSY              ((uint8_t)0x01)
+  #define SD_OK                         HAL_OK
+  #define SD_TRANSFER_OK                ((uint8_t)0x00)
+  #define SD_TRANSFER_BUSY              ((uint8_t)0x01)
 #else /* STM32L1xx */
-static SD_CardInfo uSdCardInfo;
+  static SD_CardInfo uSdCardInfo;
 #endif
 
 

@@ -1,0 +1,30 @@
+name: astyle
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '*.json'
+      - '**.md'
+      - keywords.txt
+      - library.properties
+  pull_request:
+    paths-ignore:
+      - '*.json'
+      - '**.md'
+      - keywords.txt
+      - library.properties
+  workflow_dispatch:
+jobs:
+  astyle:
+    name: Check code formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+      - uses: stm32duino/actions/astyle-check@main
+      # Use the output from the `Astyle` step
+      - name: Astyle Errors
+        if: failure()
+        run: |
+          cat ${{ steps.Astyle.outputs.astyle-result }}
+          exit 1
