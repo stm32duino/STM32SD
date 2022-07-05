@@ -287,9 +287,9 @@
 #define _FS_REENTRANT 0
 
 #if _FS_REENTRANT
-#include "cmsis_os.h"
-#define _FS_TIMEOUT   1000
-#define _SYNC_t         osSemaphoreId
+  #include "cmsis_os.h"
+  #define _FS_TIMEOUT   1000
+  #define _SYNC_t         osSemaphoreId
 #endif
 /* The option _FS_REENTRANT switches the re-entrancy (thread safe) of the FatFs
 /  module itself. Note that regardless of this option, file access to different
@@ -311,16 +311,16 @@
 /* #include <windows.h> // O/S definitions  */
 
 #if _USE_LFN == 3
-#if !defined(ff_malloc) || !defined(ff_free)
-#include <stdlib.h>
-#endif
+  #if !defined(ff_malloc) || !defined(ff_free)
+    #include <stdlib.h>
+  #endif
 
-#if !defined(ff_malloc)
-#define ff_malloc malloc
-#endif
+  #if !defined(ff_malloc)
+    #define ff_malloc malloc
+  #endif
 
-#if !defined(ff_free)
-#define ff_free free
-#endif
+  #if !defined(ff_free)
+    #define ff_free free
+  #endif
 #endif
 /*--- End of configuration options ---*/

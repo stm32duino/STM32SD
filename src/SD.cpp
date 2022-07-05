@@ -144,13 +144,13 @@ File SDClass::open(const char *filepath, uint8_t mode /* = FA_READ */)
   file._fil->fs = 0;
   file._dir.fs = 0;
 #endif
-  
+
   if ((mode == FILE_WRITE) && (!SD.exists(filepath))) {
     mode = mode | FA_CREATE_ALWAYS;
   }
 
   file._res = f_open(file._fil, filepath, mode);
-  if ( file._res != FR_OK) {
+  if (file._res != FR_OK) {
     free(file._fil);
     file._fil = NULL;
     file._res = f_opendir(&file._dir, filepath);
