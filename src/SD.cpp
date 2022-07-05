@@ -26,7 +26,7 @@
      directories which simplifies interacting with files in subdirectories.
 
    * Utility methods are provided to determine whether a file exists
-     and to create a directory heirarchy.
+     and to create a directory hierarchy.
 
  */
 
