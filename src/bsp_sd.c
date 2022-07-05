@@ -53,7 +53,9 @@
   #endif
 
   #define SD_CLK_EDGE              SDMMC_CLOCK_EDGE_RISING
-  #define SD_CLK_BYPASS            SDMMC_CLOCK_BYPASS_DISABLE
+  #if defined(SDMMC_CLOCK_BYPASS_DISABLE)
+    #define SD_CLK_BYPASS            SDMMC_CLOCK_BYPASS_DISABLE
+  #endif
   #define SD_CLK_PWR_SAVE          SDMMC_CLOCK_POWER_SAVE_DISABLE
   #define SD_BUS_WIDE_1B           SDMMC_BUS_WIDE_1B
   #define SD_BUS_WIDE_4B           SDMMC_BUS_WIDE_4B
@@ -61,10 +63,10 @@
   #define SD_HW_FLOW_CTRL_ENABLE   SDMMC_HARDWARE_FLOW_CONTROL_ENABLE
   #define SD_HW_FLOW_CTRL_DISABLE  SDMMC_HARDWARE_FLOW_CONTROL_DISABLE
 
-  #ifdef STM32H7xx
-    #define SD_CLK_DIV               1
-  #else
+  #if defined(SDMMC_TRANSFER_CLK_DIV)
     #define SD_CLK_DIV               SDMMC_TRANSFER_CLK_DIV
+  #else
+    #define SD_CLK_DIV               SDMMC_NSpeed_CLK_DIV
   #endif
 
   #ifdef SDMMC_TRANSCEIVER_ENABLE
@@ -77,7 +79,9 @@
   #define SD_CLK_ENABLE            __HAL_RCC_SDIO_CLK_ENABLE
   #define SD_CLK_DISABLE           __HAL_RCC_SDIO_CLK_DISABLE
   #define SD_CLK_EDGE              SDIO_CLOCK_EDGE_RISING
-  #define SD_CLK_BYPASS            SDIO_CLOCK_BYPASS_DISABLE
+  #if defined(SDIO_CLOCK_BYPASS_DISABLE)
+    #define SD_CLK_BYPASS            SDIO_CLOCK_BYPASS_DISABLE
+  #endif
   #define SD_CLK_PWR_SAVE          SDIO_CLOCK_POWER_SAVE_DISABLE
   #define SD_BUS_WIDE_1B           SDIO_BUS_WIDE_1B
   #define SD_BUS_WIDE_4B           SDIO_BUS_WIDE_4B
@@ -132,7 +136,7 @@ uint8_t BSP_SD_Init(void)
   uSdHandle.Instance = SD_INSTANCE;
 
   uSdHandle.Init.ClockEdge           = SD_CLK_EDGE;
-#if !defined(STM32L4xx) && !defined(STM32H7xx)
+#if defined(SD_CLK_BYPASS)
   uSdHandle.Init.ClockBypass         = SD_CLK_BYPASS;
 #endif
   uSdHandle.Init.ClockPowerSave      = SD_CLK_PWR_SAVE;
