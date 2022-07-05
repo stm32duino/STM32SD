@@ -91,6 +91,10 @@ Please update the core or install previous library version."
 #endif
 #endif
 
+#ifndef GPIO_PIN_All
+#define GPIO_PIN_All GPIO_PIN_ALL
+#endif
+
 /* SD Exported Functions */
 uint8_t BSP_SD_Init(void);
 uint8_t BSP_SD_DeInit(void);
