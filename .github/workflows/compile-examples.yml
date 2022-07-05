@@ -1,0 +1,40 @@
+name: Compile Examples
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '*.json'
+      - '**.md'
+      - keywords.txt
+      - library.properties
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        fqbn:
+          - STMicroelectronics:stm32:GenF1:pnum=BLUEBUTTON_F103RCT
+          - STMicroelectronics:stm32:Nucleo_144:pnum=NUCLEO_F207ZG
+          - STMicroelectronics:stm32:GenF4:pnum=FEATHER_F405
+          - STMicroelectronics:stm32:Disco:pnum=DISCO_F746NG
+          - STMicroelectronics:stm32:GenH7:pnum=DAISY_PATCH_SM
+          - STMicroelectronics:stm32:Eval:pnum=STEVAL_MKSBOX1V1,usb=CDCgen
+          - STMicroelectronics:stm32:Nucleo_144:pnum=NUCLEO_L552ZE_Q
+          - STMicroelectronics:stm32:Nucleo_144:pnum=NUCLEO_U575ZI_Q
+    steps:
+      - uses: actions/checkout@main
+      - uses: arduino/compile-sketches@v1
+        with:
+          fqbn: ${{ matrix.fqbn }}
+          platforms: |
+            - source-url: https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json
+              name: STMicroelectronics:stm32
+          libraries: |
+            # Install the library from the local path.
+            - source-path: ./
+            - name: FatFS
