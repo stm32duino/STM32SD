@@ -69,9 +69,14 @@
     #define SD_CLK_DIV               SDMMC_NSpeed_CLK_DIV
   #endif
 
-  #ifdef SDMMC_TRANSCEIVER_ENABLE
-    #define SD_TRANSCEIVER_ENABLE    SDMMC_TRANSCEIVER_ENABLE
-    #define SD_TRANSCEIVER_DISABLE   SDMMC_TRANSCEIVER_DISABLE
+  #if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
+    #if defined(SDMMC_TRANSCEIVER_ENABLE)
+      #define SD_TRANSCEIVER_ENABLE    SDMMC_TRANSCEIVER_ENABLE
+      #define SD_TRANSCEIVER_DISABLE   SDMMC_TRANSCEIVER_DISABLE
+    #else
+      #define SD_TRANSCEIVER_ENABLE    SDMMC_TRANSCEIVER_PRESENT
+      #define SD_TRANSCEIVER_DISABLE   SDMMC_TRANSCEIVER_NOT_PRESENT
+    #endif
   #endif
 
 #elif defined(SDIO)
@@ -101,15 +106,11 @@
   #define SD_BUS_WIDE              SD_BUS_WIDE_4B
 #endif
 
-#if defined(SDMMC_TRANSCEIVER_ENABLE) && !defined(SD_TRANSCEIVER_MODE)
-  #define SD_TRANSCEIVER_MODE      SD_TRANSCEIVER_DISABLE
-#endif
-
 /* BSP SD Private Variables */
 static SD_HandleTypeDef uSdHandle;
 static uint32_t SD_detect_ll_gpio_pin = LL_GPIO_PIN_ALL;
 static GPIO_TypeDef *SD_detect_gpio_port = GPIOA;
-#ifdef SDMMC_TRANSCEIVER_ENABLE
+#if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
   static uint32_t SD_trans_en_ll_gpio_pin = LL_GPIO_PIN_ALL;
   static GPIO_TypeDef *SD_trans_en_gpio_port = GPIOA;
   static uint32_t SD_trans_sel_ll_gpio_pin = LL_GPIO_PIN_ALL;
@@ -143,12 +144,13 @@ uint8_t BSP_SD_Init(void)
   uSdHandle.Init.BusWide             = SD_BUS_WIDE_1B;
   uSdHandle.Init.HardwareFlowControl = SD_HW_FLOW_CTRL;
   uSdHandle.Init.ClockDiv            = SD_CLK_DIV;
-#ifdef SDMMC_TRANSCEIVER_ENABLE
-  uSdHandle.Init.Transceiver = SD_TRANSCEIVER_MODE;
-  if (SD_TRANSCEIVER_MODE == SD_TRANSCEIVER_ENABLE) {
-
-    BSP_SD_Transceiver_MspInit(&uSdHandle, NULL);
-  }
+#if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
+#if defined(SDMMC_TRANSCEIVER_ENABLE)
+  uSdHandle.Init.Transceiver = SD_TRANSCEIVER_ENABLE;
+#else
+  uSdHandle.Init.TranceiverPresent   = SD_TRANSCEIVER_ENABLE;
+#endif
+  BSP_SD_Transceiver_MspInit(&uSdHandle, NULL);
 #endif
 
   if (SD_detect_ll_gpio_pin != LL_GPIO_PIN_ALL) {
@@ -205,11 +207,13 @@ uint8_t BSP_SD_DeInit(void)
   return  sd_state;
 }
 
-#ifdef SDMMC_TRANSCEIVER_ENABLE
+#if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
 /**
-  * @brief  Set the SD card device detect pin and port.
-  * @param  port one of the gpio port
-  * @param  pin one of the gpio pin
+  * @brief  Set the transceiver pin and port.
+  * @param  enport enable gpio port
+  * @param  enpin enable gpio pin
+  * @param  selport select gpio port
+  * @param  selpin select gpio pin
   * @retval SD status
   */
 uint8_t BSP_SD_TransceiverPin(GPIO_TypeDef *enport, uint32_t enpin, GPIO_TypeDef *selport, uint32_t selpin)
@@ -483,7 +487,7 @@ __weak void BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params)
 #endif
 }
 
-#ifdef SDMMC_TRANSCEIVER_ENABLE
+#if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
 /**
   * @brief  Initializes the SD Transceiver pin MSP.
   * @param  hsd: SD handle
@@ -514,7 +518,11 @@ __weak void BSP_SD_Transceiver_MspInit(SD_HandleTypeDef *hsd, void *Params)
   * @param  status: Voltage Switch State
   * @retval None
   */
-void HAL_SDEx_DriveTransceiver_1_8V_Callback(FlagStatus status)
+#if defined(SDMMC_TRANSCEIVER_ENABLE)
+  void HAL_SDEx_DriveTransceiver_1_8V_Callback(FlagStatus status)
+#else
+  void HAL_SD_DriveTransceiver_1_8V_Callback(FlagStatus status)
+#endif
 {
   if (status == SET) {
     LL_GPIO_SetOutputPin(SD_trans_sel_gpio_port, SD_trans_sel_ll_gpio_pin);
@@ -522,7 +530,7 @@ void HAL_SDEx_DriveTransceiver_1_8V_Callback(FlagStatus status)
     LL_GPIO_ResetOutputPin(SD_trans_sel_gpio_port, SD_trans_sel_ll_gpio_pin);
   }
 }
-#endif /* SDMMC_TRANSCEIVER_ENABLE */
+#endif /* USE_SD_TRANSCEIVER && (USE_SD_TRANSCEIVER != 0U) */
 
 #ifndef STM32L1xx
 /**
