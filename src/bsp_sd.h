@@ -53,6 +53,11 @@ extern "C" {
 Please update the core or install previous library version."
 #endif
 
+/* For backward compatibility */
+#if defined(SD_TRANSCEIVER_MODE) && !defined(USE_SD_TRANSCEIVER)
+#define USE_SD_TRANSCEIVER        1
+#endif
+
 /*SD Card information structure */
 #ifndef STM32L1xx
 #define HAL_SD_CardInfoTypedef         HAL_SD_CardInfoTypeDef
@@ -72,22 +77,19 @@ Please update the core or install previous library version."
 #define SD_PRESENT               ((uint8_t)0x01)
 #define SD_NOT_PRESENT           ((uint8_t)0x00)
 #define SD_DETECT_NONE           NUM_DIGITAL_PINS
-#ifdef SDMMC_TRANSCEIVER_ENABLE
-#define SD_TRANSCEIVER_NONE      NUM_DIGITAL_PINS
-#endif
 
 /* Could be redefined in variant.h or using build_opt.h */
 #ifndef SD_DATATIMEOUT
 #define SD_DATATIMEOUT         100000000U
 #endif
 
-#ifdef SDMMC_TRANSCEIVER_ENABLE
+#if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
 #ifndef SD_TRANSCEIVER_EN
-#define SD_TRANSCEIVER_EN      SD_TRANSCEIVER_NONE
+#define SD_TRANSCEIVER_EN        NUM_DIGITAL_PINS
 #endif
 
 #ifndef SD_TRANSCEIVER_SEL
-#define SD_TRANSCEIVER_SEL     SD_TRANSCEIVER_NONE
+#define SD_TRANSCEIVER_SEL       NUM_DIGITAL_PINS
 #endif
 #endif
 
@@ -98,7 +100,7 @@ Please update the core or install previous library version."
 /* SD Exported Functions */
 uint8_t BSP_SD_Init(void);
 uint8_t BSP_SD_DeInit(void);
-#ifdef SDMMC_TRANSCEIVER_ENABLE
+#if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
 uint8_t BSP_SD_TransceiverPin(GPIO_TypeDef *enport, uint32_t enpin, GPIO_TypeDef *selport, uint32_t selpin);
 #endif
 uint8_t BSP_SD_DetectPin(GPIO_TypeDef *port, uint32_t pin);
@@ -124,7 +126,7 @@ uint8_t BSP_SD_IsDetected(void);
 void    BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params);
 void    BSP_SD_Detect_MspInit(SD_HandleTypeDef *hsd, void *Params);
 void    BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params);
-#ifdef SDMMC_TRANSCEIVER_ENABLE
+#if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
 void    BSP_SD_Transceiver_MspInit(SD_HandleTypeDef *hsd, void *Params);
 #endif
 
