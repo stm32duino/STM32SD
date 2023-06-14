@@ -59,14 +59,8 @@ Please update the core or install previous library version."
 #endif
 
 /*SD Card information structure */
-#ifndef STM32L1xx
-#define HAL_SD_CardInfoTypedef         HAL_SD_CardInfoTypeDef
-#define BSP_SD_CardInfo                HAL_SD_CardInfoTypeDef
-#define HAL_SD_WideBusOperation_Config HAL_SD_ConfigWideBusOperation
-#define HAL_SD_Get_CardInfo            HAL_SD_GetCardInfo
-#endif
 
-#define SD_CardInfo HAL_SD_CardInfoTypedef
+#define SD_CardInfo HAL_SD_CardInfoTypeDef
 
 /*SD status structure definition */
 #define MSD_OK                   ((uint8_t)0x00)
@@ -105,20 +99,11 @@ uint8_t BSP_SD_TransceiverPin(GPIO_TypeDef *enport, uint32_t enpin, GPIO_TypeDef
 #endif
 uint8_t BSP_SD_DetectPin(GPIO_TypeDef *port, uint32_t pin);
 uint8_t BSP_SD_DetectITConfig(void (*callback)(void));
-#ifndef STM32L1xx
 uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint32_t ReadAddr, uint32_t NumOfBlocks, uint32_t Timeout);
 uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint32_t WriteAddr, uint32_t NumOfBlocks, uint32_t Timeout);
-#else
-uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint64_t ReadAddr, uint32_t BlockSize, uint32_t NumOfBlocks);
-uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint64_t WriteAddr, uint32_t BlockSize, uint32_t NumOfBlocks);
-#endif
 uint8_t BSP_SD_Erase(uint64_t StartAddr, uint64_t EndAddr);
-#ifndef STM32L1xx
 uint8_t BSP_SD_GetCardState(void);
-#else /* STM32L1xx */
-HAL_SD_TransferStateTypedef BSP_SD_GetStatus(void);
-#endif
-void    BSP_SD_GetCardInfo(HAL_SD_CardInfoTypedef *CardInfo);
+void    BSP_SD_GetCardInfo(HAL_SD_CardInfoTypeDef *CardInfo);
 uint8_t BSP_SD_IsDetected(void);
 
 /* These __weak function can be surcharged by application code in case the current settings (e.g. DMA stream)

@@ -116,13 +116,8 @@ static GPIO_TypeDef *SD_detect_gpio_port = GPIOA;
   static uint32_t SD_trans_sel_ll_gpio_pin = LL_GPIO_PIN_ALL;
   static GPIO_TypeDef *SD_trans_sel_gpio_port = GPIOA;
 #endif
-#ifndef STM32L1xx
-  #define SD_OK                         HAL_OK
-  #define SD_TRANSFER_OK                ((uint8_t)0x00)
-  #define SD_TRANSFER_BUSY              ((uint8_t)0x01)
-#else /* STM32L1xx */
-  static SD_CardInfo uSdCardInfo;
-#endif
+#define SD_TRANSFER_OK                ((uint8_t)0x00)
+#define SD_TRANSFER_BUSY              ((uint8_t)0x01)
 
 
 /**
@@ -165,19 +160,14 @@ uint8_t BSP_SD_Init(void)
   BSP_SD_MspInit(&uSdHandle, NULL);
 
   /* HAL SD initialization */
-#ifndef STM32L1xx
-  if (HAL_SD_Init(&uSdHandle) != SD_OK)
-#else /* STM32L1xx */
-  if (HAL_SD_Init(&uSdHandle, &uSdCardInfo) != SD_OK)
-#endif
-  {
+  if (HAL_SD_Init(&uSdHandle) != HAL_OK) {
     sd_state = MSD_ERROR;
   }
 
   /* Configure SD Bus width */
   if (sd_state == MSD_OK) {
     /* Enable wide operation */
-    if (HAL_SD_WideBusOperation_Config(&uSdHandle, SD_BUS_WIDE) != SD_OK) {
+    if (HAL_SD_ConfigWideBusOperation(&uSdHandle, SD_BUS_WIDE) != HAL_OK) {
       sd_state = MSD_ERROR;
     } else {
       sd_state = MSD_OK;
@@ -328,7 +318,6 @@ uint8_t BSP_SD_IsDetected(void)
   return status;
 }
 
-#ifndef STM32L1xx
 /**
   * @brief  Reads block(s) from a specified address in an SD card, in polling mode.
   * @param  pData: Pointer to the buffer that will contain the data to transmit
@@ -362,41 +351,6 @@ uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint32_t WriteAddr, uint32_t NumOfBl
     return MSD_OK;
   }
 }
-#else /* STM32L1xx */
-/**
-  * @brief  Reads block(s) from a specified address in an SD card, in polling mode.
-  * @param  pData: Pointer to the buffer that will contain the data to transmit
-  * @param  ReadAddr: Address from where data is to be read
-  * @param  BlockSize: SD card data block size, that should be 512
-  * @param  NumOfBlocks: Number of SD blocks to read
-  * @retval SD status
-  */
-uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint64_t ReadAddr, uint32_t BlockSize, uint32_t NumOfBlocks)
-{
-  if (HAL_SD_ReadBlocks(&uSdHandle, (uint8_t *)pData, ReadAddr, BlockSize, NumOfBlocks) != SD_OK) {
-    return MSD_ERROR;
-  } else {
-    return MSD_OK;
-  }
-}
-
-/**
-  * @brief  Writes block(s) to a specified address in an SD card, in polling mode.
-  * @param  pData: Pointer to the buffer that will contain the data to transmit
-  * @param  WriteAddr: Address from where data is to be written
-  * @param  BlockSize: SD card data block size, that should be 512
-  * @param  NumOfBlocks: Number of SD blocks to write
-  * @retval SD status
-  */
-uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint64_t WriteAddr, uint32_t BlockSize, uint32_t NumOfBlocks)
-{
-  if (HAL_SD_WriteBlocks(&uSdHandle, (uint8_t *)pData, WriteAddr, BlockSize, NumOfBlocks) != SD_OK) {
-    return MSD_ERROR;
-  } else {
-    return MSD_OK;
-  }
-}
-#endif /* !STM32L1xx */
 
 /**
   * @brief  Erases the specified memory area of the given SD card.
@@ -406,7 +360,7 @@ uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint64_t WriteAddr, uint32_t BlockSi
   */
 uint8_t BSP_SD_Erase(uint64_t StartAddr, uint64_t EndAddr)
 {
-  if (HAL_SD_Erase(&uSdHandle, StartAddr, EndAddr) != SD_OK) {
+  if (HAL_SD_Erase(&uSdHandle, StartAddr, EndAddr) != HAL_OK) {
     return MSD_ERROR;
   } else {
     return MSD_OK;
@@ -532,7 +486,6 @@ __weak void BSP_SD_Transceiver_MspInit(SD_HandleTypeDef *hsd, void *Params)
 }
 #endif /* USE_SD_TRANSCEIVER && (USE_SD_TRANSCEIVER != 0U) */
 
-#ifndef STM32L1xx
 /**
   * @brief  Gets the current SD card data status.
   * @retval Data transfer state.
@@ -544,20 +497,6 @@ uint8_t BSP_SD_GetCardState(void)
 {
   return ((HAL_SD_GetCardState(&uSdHandle) == HAL_SD_CARD_TRANSFER) ? SD_TRANSFER_OK : SD_TRANSFER_BUSY);
 }
-#else /* STM32L1xx */
-/**
-  * @brief  Gets the current SD card data status.
-  * @retval Data transfer state.
-  *          This value can be one of the following values:
-  *            @arg  SD_TRANSFER_OK: No data transfer is acting
-  *            @arg  SD_TRANSFER_BUSY: Data transfer is acting
-  *            @arg  SD_TRANSFER_ERROR: Data transfer error
-  */
-HAL_SD_TransferStateTypedef BSP_SD_GetStatus(void)
-{
-  return (HAL_SD_GetStatus(&uSdHandle));
-}
-#endif
 
 /**
   * @brief  Get SD information about specific SD card.
@@ -566,7 +505,7 @@ HAL_SD_TransferStateTypedef BSP_SD_GetStatus(void)
 void BSP_SD_GetCardInfo(HAL_SD_CardInfoTypeDef *CardInfo)
 {
   /* Get SD card Information */
-  HAL_SD_Get_CardInfo(&uSdHandle, CardInfo);
+  HAL_SD_GetCardInfo(&uSdHandle, CardInfo);
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
