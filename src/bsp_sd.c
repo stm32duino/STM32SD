@@ -63,10 +63,12 @@
   #define SD_HW_FLOW_CTRL_ENABLE   SDMMC_HARDWARE_FLOW_CONTROL_ENABLE
   #define SD_HW_FLOW_CTRL_DISABLE  SDMMC_HARDWARE_FLOW_CONTROL_DISABLE
 
-  #if defined(SDMMC_TRANSFER_CLK_DIV)
-    #define SD_CLK_DIV               SDMMC_TRANSFER_CLK_DIV
-  #else
-    #define SD_CLK_DIV               SDMMC_NSpeed_CLK_DIV
+  #ifndef SD_CLK_DIV
+    #if defined(SDMMC_TRANSFER_CLK_DIV)
+      #define SD_CLK_DIV               SDMMC_TRANSFER_CLK_DIV
+    #else
+      #define SD_CLK_DIV               SDMMC_NSpeed_CLK_DIV
+    #endif
   #endif
 
   #if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
@@ -93,7 +95,9 @@
   #define SD_BUS_WIDE_8B           SDIO_BUS_WIDE_8B
   #define SD_HW_FLOW_CTRL_ENABLE   SDIO_HARDWARE_FLOW_CONTROL_ENABLE
   #define SD_HW_FLOW_CTRL_DISABLE  SDIO_HARDWARE_FLOW_CONTROL_DISABLE
-  #define SD_CLK_DIV               SDIO_TRANSFER_CLK_DIV
+  #ifndef SD_CLK_DIV
+    #define SD_CLK_DIV               SDIO_TRANSFER_CLK_DIV
+  #endif
 #else
   #error "Unknown SD_INSTANCE"
 #endif
