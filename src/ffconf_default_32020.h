@@ -143,7 +143,7 @@
 /   1: Enable relative path. f_chdrive() and f_chdir() function are available.
 /   2: f_getcwd() function is available in addition to 1.
 /
-/  Note that output of the f_readdir() fnction is affected by this option. */
+/  Note that output of the f_readdir() function is affected by this option. */
 
 
 /*---------------------------------------------------------------------------/
