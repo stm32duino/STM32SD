@@ -132,49 +132,52 @@ uint8_t BSP_SD_Init(void)
 {
   uint8_t sd_state = MSD_OK;
 
-  /* uSD device interface configuration */
-  uSdHandle.Instance = SD_INSTANCE;
+  /* Check if SD is not yet initialized */
+  if (uSdHandle.State == HAL_SD_STATE_RESET) {
+    /* uSD device interface configuration */
+    uSdHandle.Instance = SD_INSTANCE;
 
-  uSdHandle.Init.ClockEdge           = SD_CLK_EDGE;
+    uSdHandle.Init.ClockEdge           = SD_CLK_EDGE;
 #if defined(SD_CLK_BYPASS)
-  uSdHandle.Init.ClockBypass         = SD_CLK_BYPASS;
+    uSdHandle.Init.ClockBypass         = SD_CLK_BYPASS;
 #endif
-  uSdHandle.Init.ClockPowerSave      = SD_CLK_PWR_SAVE;
-  uSdHandle.Init.BusWide             = SD_BUS_WIDE_1B;
-  uSdHandle.Init.HardwareFlowControl = SD_HW_FLOW_CTRL;
-  uSdHandle.Init.ClockDiv            = SD_CLK_DIV;
+    uSdHandle.Init.ClockPowerSave      = SD_CLK_PWR_SAVE;
+    uSdHandle.Init.BusWide             = SD_BUS_WIDE_1B;
+    uSdHandle.Init.HardwareFlowControl = SD_HW_FLOW_CTRL;
+    uSdHandle.Init.ClockDiv            = SD_CLK_DIV;
 #if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
 #if defined(SDMMC_TRANSCEIVER_ENABLE)
-  uSdHandle.Init.Transceiver = SD_TRANSCEIVER_ENABLE;
+    uSdHandle.Init.Transceiver = SD_TRANSCEIVER_ENABLE;
 #else
-  uSdHandle.Init.TranceiverPresent   = SD_TRANSCEIVER_ENABLE;
+    uSdHandle.Init.TranceiverPresent   = SD_TRANSCEIVER_ENABLE;
 #endif
-  BSP_SD_Transceiver_MspInit(&uSdHandle, NULL);
+    BSP_SD_Transceiver_MspInit(&uSdHandle, NULL);
 #endif
 
-  if (SD_detect_ll_gpio_pin != LL_GPIO_PIN_ALL) {
-    /* Msp SD Detect pin initialization */
-    BSP_SD_Detect_MspInit(&uSdHandle, NULL);
-    if (BSP_SD_IsDetected() != SD_PRESENT) { /* Check if SD card is present */
-      return MSD_ERROR_SD_NOT_PRESENT;
+    if (SD_detect_ll_gpio_pin != LL_GPIO_PIN_ALL) {
+      /* Msp SD Detect pin initialization */
+      BSP_SD_Detect_MspInit(&uSdHandle, NULL);
+      if (BSP_SD_IsDetected() != SD_PRESENT) { /* Check if SD card is present */
+        return MSD_ERROR_SD_NOT_PRESENT;
+      }
     }
-  }
 
-  /* Msp SD initialization */
-  BSP_SD_MspInit(&uSdHandle, NULL);
+    /* Msp SD initialization */
+    BSP_SD_MspInit(&uSdHandle, NULL);
 
-  /* HAL SD initialization */
-  if (HAL_SD_Init(&uSdHandle) != HAL_OK) {
-    sd_state = MSD_ERROR;
-  }
-
-  /* Configure SD Bus width */
-  if (sd_state == MSD_OK) {
-    /* Enable wide operation */
-    if (HAL_SD_ConfigWideBusOperation(&uSdHandle, SD_BUS_WIDE) != HAL_OK) {
+    /* HAL SD initialization */
+    if (HAL_SD_Init(&uSdHandle) != HAL_OK) {
       sd_state = MSD_ERROR;
-    } else {
-      sd_state = MSD_OK;
+    }
+
+    /* Configure SD Bus width */
+    if (sd_state == MSD_OK) {
+      /* Enable wide operation */
+      if (HAL_SD_ConfigWideBusOperation(&uSdHandle, SD_BUS_WIDE) != HAL_OK) {
+        sd_state = MSD_ERROR;
+      } else {
+        sd_state = MSD_OK;
+      }
     }
   }
   return  sd_state;
