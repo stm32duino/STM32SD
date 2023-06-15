@@ -40,7 +40,7 @@ Some default definitions can be overridden using:
 #### SD configurations
 
 * `SD_INSTANCE`: some STM32 can have 2 SD peripherals `SDMMC1` and `SDMMC2`, note that this library can managed only one peripheral
-  * `SDMMC1` (default)
+  * `SDIO` or `SDMMC1` (default)
   * `SDMMC2`
 
 * `SD_HW_FLOW_CTRL`: specifies whether the SDMMC hardware flow control is enabled or disabled
@@ -51,6 +51,10 @@ Some default definitions can be overridden using:
   * `SD_BUS_WIDE_1B`
   * `SD_BUS_WIDE_4B` (default)
   * `SD_BUS_WIDE_8B`
+
+* `SD_CLK_DIV`: specifies the clock frequency of the SDMMC controller (0-255)
+  * `SDIO_TRANSFER_CLK_DIV` (default) for `SDIO`
+  * `SDMMC_TRANSFER_CLK_DIV` or `SDMMC_NSpeed_CLK_DIV` (default) for `SDMMC`
 
 #### SD Transceiver
 
