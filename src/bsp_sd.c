@@ -35,6 +35,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "bsp_sd.h"
+#include "core_debug.h"
 #include "interrupt.h"
 #include "PeripheralPins.h"
 #include "stm32yyxx_ll_gpio.h"
@@ -122,7 +123,105 @@ static GPIO_TypeDef *SD_detect_gpio_port = GPIOA;
 #endif
 #define SD_TRANSFER_OK                ((uint8_t)0x00)
 #define SD_TRANSFER_BUSY              ((uint8_t)0x01)
+SD_PinName_t SD_PinNames = {
+  .pin_d0 = NC,
+  .pin_d1 = NC,
+  .pin_d2 = NC,
+  .pin_d3 = NC,
+  .pin_cmd = NC,
+  .pin_ck = NC,
+#if defined(SDMMC1) || defined(SDMMC2)
+  .pin_ckin = NC,
+  .pin_cdir = NC,
+  .pin_d0dir = NC,
+  .pin_d123dir = NC
+#endif
+};
 
+#if defined(STM32_CORE_VERSION) && (STM32_CORE_VERSION > 0x02050000)
+/**
+  * @brief  Get the SD card device instance from pins
+  * @retval SD status
+  */
+uint8_t BSP_SD_GetInstance(void)
+{
+  SD_TypeDef *sd_d0 = NP;
+  SD_TypeDef *sd_d1 = NP;
+  SD_TypeDef *sd_d2 = NP;
+  SD_TypeDef *sd_d3 = NP;
+  SD_TypeDef *sd_cmd = NP;
+  SD_TypeDef *sd_ck = NP;
+
+  if (SD_PinNames.pin_d0 == NC) {
+    /* No pin defined assume to use first pin available in each PinMap_SD_* arrays */
+    SD_PinNames.pin_d0 = PinMap_SD_DATA0[0].pin;
+    SD_PinNames.pin_d1 = PinMap_SD_DATA1[0].pin;
+    SD_PinNames.pin_d2 = PinMap_SD_DATA2[0].pin;
+    SD_PinNames.pin_d3 = PinMap_SD_DATA3[0].pin;
+    SD_PinNames.pin_cmd = PinMap_SD_CMD[0].pin;
+    SD_PinNames.pin_ck = PinMap_SD_CK[0].pin;
+#if defined(SDMMC1) && defined(SDMMC2)
+    SD_PinNames.pin_ckin = PinMap_SD_CKIN[0].pin;
+    SD_PinNames.pin_cdir = PinMap_SD_CDIR[0].pin;
+    SD_PinNames.pin_d0dir = PinMap_SD_D0DIR[0].pin;
+    SD_PinNames.pin_d123dir = PinMap_SD_D123DIR[0].pin;
+#endif /* SDMMC1 && SDMMC2 */
+  }
+  /* Get SD instance from pins */
+  sd_d0 = pinmap_peripheral(SD_PinNames.pin_d0, PinMap_SD_DATA0);
+  sd_d1 = pinmap_peripheral(SD_PinNames.pin_d1, PinMap_SD_DATA1);
+  sd_d2 = pinmap_peripheral(SD_PinNames.pin_d2, PinMap_SD_DATA2);
+  sd_d3 = pinmap_peripheral(SD_PinNames.pin_d3, PinMap_SD_DATA3);
+
+  sd_cmd = pinmap_peripheral(SD_PinNames.pin_cmd, PinMap_SD_CMD);
+  sd_ck = pinmap_peripheral(SD_PinNames.pin_ck, PinMap_SD_CK);
+
+  /* Pins Dx/cmd/CK must not be NP. */
+  if (sd_d0 == NP || sd_d1 == NP || sd_d2 == NP || sd_d3 == NP || sd_cmd == NP || sd_ck == NP) {
+    core_debug("ERROR: at least one SD pin has no peripheral\n");
+    return MSD_ERROR;
+  }
+
+  SD_TypeDef *sd_d01 = pinmap_merge_peripheral(sd_d0, sd_d1);
+  SD_TypeDef *sd_d23 = pinmap_merge_peripheral(sd_d2, sd_d3);
+  SD_TypeDef *sd_cx = pinmap_merge_peripheral(sd_cmd, sd_ck);
+  SD_TypeDef *sd_dx = pinmap_merge_peripheral(sd_d01, sd_d23);
+  SD_TypeDef *sd_base = pinmap_merge_peripheral(sd_dx, sd_cx);
+  if (sd_d01 == NP || sd_d23 == NP || sd_cx == NP || sd_dx == NP || sd_base == NP) {
+    core_debug("ERROR: SD pins mismatch\n");
+    return MSD_ERROR;
+  }
+  uSdHandle.Instance = sd_base;
+#if defined(SDMMC1) && defined(SDMMC2)
+  if (SD_PinNames.pin_ckin != NC) {
+    SD_TypeDef *sd_ckin = pinmap_peripheral(SD_PinNames.pin_ckin, PinMap_SD_CKIN);
+    SD_TypeDef *sd_cdir = pinmap_peripheral(SD_PinNames.pin_cdir, PinMap_SD_CDIR);
+    SD_TypeDef *sd_d0dir = pinmap_peripheral(SD_PinNames.pin_d0dir, PinMap_SD_D0DIR);
+    SD_TypeDef *sd_d123dir = pinmap_peripheral(SD_PinNames.pin_d123dir, PinMap_SD_D123DIR);
+
+    /* Pins Dx/cmd/CK must not be NP. */
+    if (sd_ckin == NP || sd_cdir == NP || sd_d0dir == NP || sd_d123dir == NP) {
+      core_debug("ERROR: at least one SDMMC pin has no peripheral\n");
+      return MSD_ERROR;
+    }
+    SD_TypeDef *sdmmc_cx = pinmap_merge_peripheral(sd_ckin, sd_cdir);
+    SD_TypeDef *sdmmc_dx = pinmap_merge_peripheral(sd_d0dir, sd_d123dir);
+    SD_TypeDef *sdmmc_base = pinmap_merge_peripheral(sdmmc_cx, sdmmc_dx);
+    if (sdmmc_cx == NP || sdmmc_dx == NP || sdmmc_base == NP) {
+      core_debug("ERROR: SD pins mismatch\n");
+      return MSD_ERROR;
+    }
+    uSdHandle.Instance = pinmap_merge_peripheral(sd_base, sdmmc_base);
+  }
+#endif
+  /* Are all pins connected to the same SDx instance? */
+  if (uSdHandle.Instance == NP) {
+    core_debug("ERROR: SD pins mismatch\n");
+    return MSD_ERROR;
+  }
+  return MSD_OK;
+}
+#endif /* STM32_CORE_VERSION */
 
 /**
   * @brief  Initializes the SD card device with CS check if any.
@@ -135,7 +234,13 @@ uint8_t BSP_SD_Init(void)
   /* Check if SD is not yet initialized */
   if (uSdHandle.State == HAL_SD_STATE_RESET) {
     /* uSD device interface configuration */
+#if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION <= 0x02050000)
     uSdHandle.Instance = SD_INSTANCE;
+#else
+    if (BSP_SD_GetInstance() == MSD_ERROR) {
+      return MSD_ERROR;
+    }
+#endif
 
     uSdHandle.Init.ClockEdge           = SD_CLK_EDGE;
 #if defined(SD_CLK_BYPASS)
@@ -191,7 +296,13 @@ uint8_t BSP_SD_DeInit(void)
 {
   uint8_t sd_state = MSD_OK;
 
+#if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION <= 0x02050000)
   uSdHandle.Instance = SD_INSTANCE;
+#else
+  if (BSP_SD_GetInstance() == MSD_ERROR) {
+    return MSD_ERROR;
+  }
+#endif
 
   /* HAL SD deinitialization */
   if (HAL_SD_DeInit(&uSdHandle) != HAL_OK) {
@@ -382,14 +493,29 @@ uint8_t BSP_SD_Erase(uint64_t StartAddr, uint64_t EndAddr)
 __weak void BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params)
 {
   UNUSED(Params);
-
+#if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION <= 0x02050000)
   /* Configure SD GPIOs */
   const PinMap *map = PinMap_SD;
   while (map->pin != NC) {
     pin_function(map->pin, map->function);
     map++;
   }
-
+#else
+  /* Configure SD GPIO pins */
+  pinmap_pinout(SD_PinNames.pin_d0, PinMap_SD_DATA0);
+  pinmap_pinout(SD_PinNames.pin_d1, PinMap_SD_DATA1);
+  pinmap_pinout(SD_PinNames.pin_d2, PinMap_SD_DATA2);
+  pinmap_pinout(SD_PinNames.pin_d3, PinMap_SD_DATA3);
+  pinmap_pinout(SD_PinNames.pin_cmd, PinMap_SD_CMD);
+  pinmap_pinout(SD_PinNames.pin_ck, PinMap_SD_CK);
+#if defined(SDMMC1) && defined(SDMMC2)
+  if (SD_PinNames.pin_ckin != NC) {
+    pinmap_pinout(SD_PinNames.pin_ckin, PinMap_SD_CKIN);
+    pinmap_pinout(SD_PinNames.pin_cdir, PinMap_SD_CDIR);
+    pinmap_pinout(SD_PinNames.pin_d0dir, PinMap_SD_D0DIR);
+    pinmap_pinout(SD_PinNames.pin_d123dir, PinMap_SD_D123DIR);
+  }
+#endif
   /* Enable SD clock */
 #if defined(SDMMC1) && defined(SDMMC2)
   if (hsd->Instance == SDMMC1) {
@@ -400,6 +526,7 @@ __weak void BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params)
 #else
   UNUSED(hsd);
   SD_CLK_ENABLE();
+#endif
 #endif
 }
 
@@ -431,9 +558,30 @@ __weak void BSP_SD_Detect_MspInit(SD_HandleTypeDef *hsd, void *Params)
 __weak void BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params)
 {
   UNUSED(Params);
-
   /* DeInit GPIO pins can be done in the application
      (by surcharging this __weak function) */
+#if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION <= 0x02050000)
+  const PinMap *map = PinMap_SD;
+  while (map->pin != NC) {
+    HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(map->pin), STM_GPIO_PIN(map->pin));
+    map++;
+  }
+#else
+  HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_d0), STM_GPIO_PIN(SD_PinNames.pin_d0));
+  HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_d1), STM_GPIO_PIN(SD_PinNames.pin_d1));
+  HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_d2), STM_GPIO_PIN(SD_PinNames.pin_d2));
+  HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_d3), STM_GPIO_PIN(SD_PinNames.pin_d3));
+  HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_cmd), STM_GPIO_PIN(SD_PinNames.pin_cmd));
+  HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_ck), STM_GPIO_PIN(SD_PinNames.pin_ck));
+#if defined(SDMMC1) && defined(SDMMC2)
+  if (SD_PinNames.pin_ckin != NC) {
+    HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_ckin), STM_GPIO_PIN(SD_PinNames.pin_ckin));
+    HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_cdir), STM_GPIO_PIN(SD_PinNames.pin_cdir));
+    HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_d0dir), STM_GPIO_PIN(SD_PinNames.pin_d0dir));
+    HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_d123dir), STM_GPIO_PIN(SD_PinNames.pin_d123dir));
+  }
+#endif
+#endif
 
   /* Disable SD clock */
 #if defined(SDMMC1) && defined(SDMMC2)
