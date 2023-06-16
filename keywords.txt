@@ -24,7 +24,13 @@ open	KEYWORD2
 close	KEYWORD2
 seek	KEYWORD2
 position	KEYWORD2
-size	KEYWORD2	
+size	KEYWORD2
+setDx	KEYWORD2
+setCK	KEYWORD2
+setCMD	KEYWORD2
+setCKIN	KEYWORD2
+setCDIR	KEYWORD2
+setDxDIR	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

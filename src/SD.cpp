@@ -59,13 +59,68 @@ SDClass SD;
 /**
   * @brief  Link SD, register the file system object to the FatFs mode and configure
   *         relatives SD IOs including SD Detect Pin if any
-  * @param  None
+  * @param  data0: data0 pin number (default SDX_D0)
+  * @param  data1: data1 pin number (default SDX_D1)
+  * @param  data2: data2 pin number (default SDX_D2)
+  * @param  data3: data3 pin number (default SDX_D3)
+  * @param  ck: ck pin number (default SDX_CK)
+  * @param  cmd: cmd pin number (default SDX_CMD)
+  * @param  ckin: ckin pin number only for SDMMC (default SDX_CKIN)
+  * @param  cdir: cdir pin number only for SDMMC (default SDX_CDIR)
+  * @param  d0dir: d0dir pin number only for SDMMC (default SDX_D0DIR)
+  * @param  d123dir: d123dir pin number only for SDMMC (default SDX_D123DIR)
   * @retval true or false
   */
-bool SDClass::begin(uint32_t detectpin)
+#if defined(SDMMC1) || defined(SDMMC2)
+bool SDClass::begin(uint32_t data0, uint32_t data1, uint32_t data2, uint32_t data3,
+                    uint32_t ck, uint32_t cmd, uint32_t ckin, uint32_t cdir,
+                    uint32_t d0dir, uint32_t d123dir)
 {
+  return begin(SD_DETECT_NONE, data0, data1, data2, data3, ck, cmd, ckin, cdir, d0dir, d123dir);
+}
+
+#else
+bool SDClass::begin(uint32_t data0, uint32_t data1, uint32_t data2,
+                    uint32_t data3, uint32_t ck, uint32_t cmd)
+{
+  return begin(SD_DETECT_NONE, data0, data1, data2, data3, ck, cmd);
+}
+#endif
+
+/**
+  * @brief  Link SD, register the file system object to the FatFs mode and configure
+  *         relatives SD IOs including SD Detect Pin if any
+  * @param  detect: detect pin number (default SD_DETECT_NONE)
+  * @param  data0: data0 pin number (default SDX_D0)
+  * @param  data1: data1 pin number (default SDX_D1)
+  * @param  data2: data2 pin number (default SDX_D2)
+  * @param  data3: data3 pin number (default SDX_D3)
+  * @param  ck: ck pin number (default SDX_CK)
+  * @param  cmd: cmd pin number (default SDX_CMD)
+  * @param  ckin: ckin pin number only for SDMMC (default SDX_CKIN)
+  * @param  cdir: cdir pin number only for SDMMC (default SDX_CDIR)
+  * @param  d0dir: d0dir pin number only for SDMMC (default SDX_D0DIR)
+  * @param  d123dir: d123dir pin number only for SDMMC (default SDX_D123DIR)
+  * @retval true or false
+  */
+#if defined(SDMMC1) || defined(SDMMC2)
+bool SDClass::begin(uint32_t detect, uint32_t data0, uint32_t data1, uint32_t data2, uint32_t data3,
+                    uint32_t ck, uint32_t cmd, uint32_t ckin, uint32_t cdir, uint32_t d0dir, uint32_t d123dir)
+#else
+bool SDClass::begin(uint32_t detect, uint32_t data0, uint32_t data1, uint32_t data2,
+                    uint32_t data3, uint32_t ck, uint32_t cmd)
+#endif
+{
+  setDx(data0, data1, data2, data3);
+  setCK(ck);
+  setCMD(cmd);
+#if defined(SDMMC1) || defined(SDMMC2)
+  setCKIN(ckin);
+  setCDIR(cdir);
+  setDxDIR(d0dir, d123dir);
+#endif
   /*##-1- Initializes SD IOs #############################################*/
-  if (_card.init(detectpin)) {
+  if (_card.init(detect)) {
     return _fatFs.init();
   }
   return false;

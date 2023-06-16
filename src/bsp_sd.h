@@ -44,10 +44,9 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+#include "PinNames.h"
 #include "stm32_def.h"
-#if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION  <= 0x01050000)
 #include "variant.h"
-#endif
 #if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION  <= 0x01060100)
 #error "This library version required a STM32 core version > 1.6.1.\
 Please update the core or install previous library version."
@@ -90,6 +89,57 @@ Please update the core or install previous library version."
 #ifndef GPIO_PIN_All
 #define GPIO_PIN_All GPIO_PIN_ALL
 #endif
+
+/* Default SDx pins definitions */
+#ifndef SDX_D0
+#define SDX_D0           NUM_DIGITAL_PINS
+#endif
+#ifndef SDX_D1
+#define SDX_D1           NUM_DIGITAL_PINS
+#endif
+#ifndef SDX_D2
+#define SDX_D2           NUM_DIGITAL_PINS
+#endif
+#ifndef SDX_D3
+#define SDX_D3           NUM_DIGITAL_PINS
+#endif
+#ifndef SDX_CMD
+#define SDX_CMD          NUM_DIGITAL_PINS
+#endif
+#ifndef SDX_CK
+#define SDX_CK           NUM_DIGITAL_PINS
+#endif
+#if defined(SDMMC1) || defined(SDMMC2)
+#ifndef SDX_CKIN
+#define SDX_CKIN         NUM_DIGITAL_PINS
+#endif
+#ifndef SDX_CDIR
+#define SDX_CDIR         NUM_DIGITAL_PINS
+#endif
+#ifndef SDX_D0DIR
+#define SDX_D0DIR        NUM_DIGITAL_PINS
+#endif
+#ifndef SDX_D123DIR
+#define SDX_D123DIR      NUM_DIGITAL_PINS
+#endif
+#endif /* SDMMC1 || SDMMC2 */
+
+typedef struct {
+  PinName pin_d0;
+  PinName pin_d1;
+  PinName pin_d2;
+  PinName pin_d3;
+  PinName pin_cmd;
+  PinName pin_ck;
+#if defined(SDMMC1) || defined(SDMMC2)
+  PinName pin_ckin;
+  PinName pin_cdir;
+  PinName pin_d0dir;
+  PinName pin_d123dir;
+#endif
+} SD_PinName_t;
+
+extern SD_PinName_t SD_PinNames;
 
 /* SD Exported Functions */
 uint8_t BSP_SD_Init(void);
