@@ -516,6 +516,7 @@ __weak void BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params)
     pinmap_pinout(SD_PinNames.pin_d123dir, PinMap_SD_D123DIR);
   }
 #endif
+#endif
   /* Enable SD clock */
 #if defined(SDMMC1) && defined(SDMMC2)
   if (hsd->Instance == SDMMC1) {
@@ -526,7 +527,6 @@ __weak void BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params)
 #else
   UNUSED(hsd);
   SD_CLK_ENABLE();
-#endif
 #endif
 }
 
