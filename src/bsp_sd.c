@@ -160,12 +160,12 @@ uint8_t BSP_SD_GetInstance(void)
     SD_PinNames.pin_d3 = PinMap_SD_DATA3[0].pin;
     SD_PinNames.pin_cmd = PinMap_SD_CMD[0].pin;
     SD_PinNames.pin_ck = PinMap_SD_CK[0].pin;
-#if defined(SDMMC1) && defined(SDMMC2)
+#if defined(SDMMC1) || defined(SDMMC2)
     SD_PinNames.pin_ckin = PinMap_SD_CKIN[0].pin;
     SD_PinNames.pin_cdir = PinMap_SD_CDIR[0].pin;
     SD_PinNames.pin_d0dir = PinMap_SD_D0DIR[0].pin;
     SD_PinNames.pin_d123dir = PinMap_SD_D123DIR[0].pin;
-#endif /* SDMMC1 && SDMMC2 */
+#endif /* SDMMC1 || SDMMC2 */
   }
   /* Get SD instance from pins */
   sd_d0 = pinmap_peripheral(SD_PinNames.pin_d0, PinMap_SD_DATA0);
@@ -192,7 +192,7 @@ uint8_t BSP_SD_GetInstance(void)
     return MSD_ERROR;
   }
   uSdHandle.Instance = sd_base;
-#if defined(SDMMC1) && defined(SDMMC2)
+#if defined(SDMMC1) || defined(SDMMC2)
   if (SD_PinNames.pin_ckin != NC) {
     SD_TypeDef *sd_ckin = pinmap_peripheral(SD_PinNames.pin_ckin, PinMap_SD_CKIN);
     SD_TypeDef *sd_cdir = pinmap_peripheral(SD_PinNames.pin_cdir, PinMap_SD_CDIR);
@@ -508,7 +508,7 @@ __weak void BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params)
   pinmap_pinout(SD_PinNames.pin_d3, PinMap_SD_DATA3);
   pinmap_pinout(SD_PinNames.pin_cmd, PinMap_SD_CMD);
   pinmap_pinout(SD_PinNames.pin_ck, PinMap_SD_CK);
-#if defined(SDMMC1) && defined(SDMMC2)
+#if defined(SDMMC1) || defined(SDMMC2)
   if (SD_PinNames.pin_ckin != NC) {
     pinmap_pinout(SD_PinNames.pin_ckin, PinMap_SD_CKIN);
     pinmap_pinout(SD_PinNames.pin_cdir, PinMap_SD_CDIR);
@@ -573,7 +573,7 @@ __weak void BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params)
   HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_d3), STM_GPIO_PIN(SD_PinNames.pin_d3));
   HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_cmd), STM_GPIO_PIN(SD_PinNames.pin_cmd));
   HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_ck), STM_GPIO_PIN(SD_PinNames.pin_ck));
-#if defined(SDMMC1) && defined(SDMMC2)
+#if defined(SDMMC1) || defined(SDMMC2)
   if (SD_PinNames.pin_ckin != NC) {
     HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_ckin), STM_GPIO_PIN(SD_PinNames.pin_ckin));
     HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_cdir), STM_GPIO_PIN(SD_PinNames.pin_cdir));
