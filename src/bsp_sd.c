@@ -43,14 +43,11 @@
 /* Definition for BSP SD */
 #if defined(SDMMC1) || defined(SDMMC2)
   #ifndef SD_INSTANCE
-    #define SD_INSTANCE              SDMMC1
-  #endif
-
-  #define SD_CLK_ENABLE            __HAL_RCC_SDMMC1_CLK_ENABLE
-  #define SD_CLK_DISABLE           __HAL_RCC_SDMMC1_CLK_DISABLE
-  #ifdef SDMMC2
-    #define SD_CLK2_ENABLE            __HAL_RCC_SDMMC2_CLK_ENABLE
-    #define SD_CLK2_DISABLE           __HAL_RCC_SDMMC2_CLK_DISABLE
+    #if defined(SDMMC1)
+      #define SD_INSTANCE              SDMMC1
+    #else
+      #define SD_INSTANCE              SDMMC2
+    #endif
   #endif
 
   #define SD_CLK_EDGE              SDMMC_CLOCK_EDGE_RISING
@@ -84,8 +81,6 @@
 
 #elif defined(SDIO)
   #define SD_INSTANCE              SDIO
-  #define SD_CLK_ENABLE            __HAL_RCC_SDIO_CLK_ENABLE
-  #define SD_CLK_DISABLE           __HAL_RCC_SDIO_CLK_DISABLE
   #define SD_CLK_EDGE              SDIO_CLOCK_EDGE_RISING
   #if defined(SDIO_CLOCK_BYPASS_DISABLE)
     #define SD_CLK_BYPASS            SDIO_CLOCK_BYPASS_DISABLE
@@ -518,15 +513,20 @@ __weak void BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params)
 #endif
 #endif
   /* Enable SD clock */
-#if defined(SDMMC1) && defined(SDMMC2)
+#if defined(SDMMC1) || defined(SDMMC2)
+#if defined(SDMMC1)
   if (hsd->Instance == SDMMC1) {
-    SD_CLK_ENABLE();
-  } else {
-    SD_CLK2_ENABLE();
+    __HAL_RCC_SDMMC1_CLK_ENABLE();
   }
+#endif
+#if defined(SDMMC2)
+  if (hsd->Instance == SDMMC2) {
+    __HAL_RCC_SDMMC2_CLK_ENABLE();
+  }
+#endif
 #else
   UNUSED(hsd);
-  SD_CLK_ENABLE();
+  __HAL_RCC_SDIO_CLK_ENABLE();
 #endif
 }
 
@@ -584,15 +584,20 @@ __weak void BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params)
 #endif
 
   /* Disable SD clock */
-#if defined(SDMMC1) && defined(SDMMC2)
+#if defined(SDMMC1) || defined(SDMMC2)
+#if defined(SDMMC1)
   if (hsd->Instance == SDMMC1) {
-    SD_CLK_DISABLE();
-  } else {
-    SD_CLK2_DISABLE();
+    __HAL_RCC_SDMMC1_CLK_DISABLE();
   }
+#endif
+#if defined(SDMMC2)
+  if (hsd->Instance == SDMMC2) {
+    __HAL_RCC_SDMMC2_CLK_DISABLE();
+  }
+#endif
 #else
   UNUSED(hsd);
-  SD_CLK_DISABLE();
+  __HAL_RCC_SDIO_CLK_DISABLE();
 #endif
 }
 
