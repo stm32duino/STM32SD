@@ -156,10 +156,18 @@ uint8_t BSP_SD_GetInstance(void)
     SD_PinNames.pin_cmd = PinMap_SD_CMD[0].pin;
     SD_PinNames.pin_ck = PinMap_SD_CK[0].pin;
 #if defined(SDMMC1) || defined(SDMMC2)
+#if !defined(SDMMC_CKIN_NA)
     SD_PinNames.pin_ckin = PinMap_SD_CKIN[0].pin;
+#endif
+#if !defined(SDMMC_CDIR_NA)
     SD_PinNames.pin_cdir = PinMap_SD_CDIR[0].pin;
+#endif
+#if !defined(SDMMC_D0DIR_NA)
     SD_PinNames.pin_d0dir = PinMap_SD_D0DIR[0].pin;
+#endif
+#if !defined(SDMMC_D123DIR_NA)
     SD_PinNames.pin_d123dir = PinMap_SD_D123DIR[0].pin;
+#endif
 #endif /* SDMMC1 || SDMMC2 */
   }
   /* Get SD instance from pins */
@@ -188,27 +196,43 @@ uint8_t BSP_SD_GetInstance(void)
   }
   uSdHandle.Instance = sd_base;
 #if defined(SDMMC1) || defined(SDMMC2)
+#if !defined(SDMMC_CKIN_NA)
   if (SD_PinNames.pin_ckin != NC) {
     SD_TypeDef *sd_ckin = pinmap_peripheral(SD_PinNames.pin_ckin, PinMap_SD_CKIN);
-    SD_TypeDef *sd_cdir = pinmap_peripheral(SD_PinNames.pin_cdir, PinMap_SD_CDIR);
-    SD_TypeDef *sd_d0dir = pinmap_peripheral(SD_PinNames.pin_d0dir, PinMap_SD_D0DIR);
-    SD_TypeDef *sd_d123dir = pinmap_peripheral(SD_PinNames.pin_d123dir, PinMap_SD_D123DIR);
-
-    /* Pins Dx/cmd/CK must not be NP. */
-    if (sd_ckin == NP || sd_cdir == NP || sd_d0dir == NP || sd_d123dir == NP) {
-      core_debug("ERROR: at least one SDMMC pin has no peripheral\n");
+    if (pinmap_merge_peripheral(sd_ckin, sd_base) == NP) {
+      core_debug("ERROR: SD CKIN pin mismatch\n");
       return MSD_ERROR;
     }
-    SD_TypeDef *sdmmc_cx = pinmap_merge_peripheral(sd_ckin, sd_cdir);
-    SD_TypeDef *sdmmc_dx = pinmap_merge_peripheral(sd_d0dir, sd_d123dir);
-    SD_TypeDef *sdmmc_base = pinmap_merge_peripheral(sdmmc_cx, sdmmc_dx);
-    if (sdmmc_cx == NP || sdmmc_dx == NP || sdmmc_base == NP) {
-      core_debug("ERROR: SD pins mismatch\n");
-      return MSD_ERROR;
-    }
-    uSdHandle.Instance = pinmap_merge_peripheral(sd_base, sdmmc_base);
   }
 #endif
+#if !defined(SDMMC_CDIR_NA)
+  if (SD_PinNames.pin_cdir != NC) {
+    SD_TypeDef *sd_cdir = pinmap_peripheral(SD_PinNames.pin_cdir, PinMap_SD_CDIR);
+    if (pinmap_merge_peripheral(sd_cdir, sd_base) == NP) {
+      core_debug("ERROR: SD CDIR pin mismatch\n");
+      return MSD_ERROR;
+    }
+  }
+#endif
+#if !defined(SDMMC_D0DIR_NA)
+  if (SD_PinNames.pin_cdir != NC) {
+    SD_TypeDef *sd_d0dir = pinmap_peripheral(SD_PinNames.pin_d0dir, PinMap_SD_D0DIR);
+    if (pinmap_merge_peripheral(sd_d0dir, sd_base) == NP) {
+      core_debug("ERROR: SD DODIR pin mismatch\n");
+      return MSD_ERROR;
+    }
+  }
+#endif
+#if !defined(SDMMC_D123DIR_NA)
+  if (SD_PinNames.pin_cdir != NC) {
+    SD_TypeDef *sd_d123dir = pinmap_peripheral(SD_PinNames.pin_d123dir, PinMap_SD_D123DIR);
+    if (pinmap_merge_peripheral(sd_d123dir, sd_base) == NP) {
+      core_debug("ERROR: SD D123DIR pin mismatch\n");
+      return MSD_ERROR;
+    }
+  }
+#endif
+#endif /* SDMMC1 || SDMMC2 */
   /* Are all pins connected to the same SDx instance? */
   if (uSdHandle.Instance == NP) {
     core_debug("ERROR: SD pins mismatch\n");
@@ -216,7 +240,7 @@ uint8_t BSP_SD_GetInstance(void)
   }
   return MSD_OK;
 }
-#endif /* STM32_CORE_VERSION */
+#endif /* STM32_CORE_VERSION && (STM32_CORE_VERSION > 0x02050000) */
 
 /**
   * @brief  Initializes the SD card device with CS check if any.
@@ -235,7 +259,7 @@ uint8_t BSP_SD_Init(void)
     if (BSP_SD_GetInstance() == MSD_ERROR) {
       return MSD_ERROR;
     }
-#endif
+#endif /* !STM32_CORE_VERSION || (STM32_CORE_VERSION <= 0x02050000) */
 
     uSdHandle.Init.ClockEdge           = SD_CLK_EDGE;
 #if defined(SD_CLK_BYPASS)
@@ -504,14 +528,28 @@ __weak void BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params)
   pinmap_pinout(SD_PinNames.pin_cmd, PinMap_SD_CMD);
   pinmap_pinout(SD_PinNames.pin_ck, PinMap_SD_CK);
 #if defined(SDMMC1) || defined(SDMMC2)
+#if !defined(SDMMC_CKIN_NA)
   if (SD_PinNames.pin_ckin != NC) {
     pinmap_pinout(SD_PinNames.pin_ckin, PinMap_SD_CKIN);
+  }
+#endif
+#if !defined(SDMMC_CDIR_NA)
+  if (SD_PinNames.pin_cdir != NC) {
     pinmap_pinout(SD_PinNames.pin_cdir, PinMap_SD_CDIR);
+  }
+#endif
+#if !defined(SDMMC_D0DIR_NA)
+  if (SD_PinNames.pin_d0dir != NC) {
     pinmap_pinout(SD_PinNames.pin_d0dir, PinMap_SD_D0DIR);
+  }
+#endif
+#if !defined(SDMMC_D123DIR_NA)
+  if (SD_PinNames.pin_d123dir != NC) {
     pinmap_pinout(SD_PinNames.pin_d123dir, PinMap_SD_D123DIR);
   }
 #endif
-#endif
+#endif /* SDMMC1 || SDMMC2 */
+#endif /* !STM32_CORE_VERSION || (STM32_CORE_VERSION <= 0x02050000) */
   /* Enable SD clock */
 #if defined(SDMMC1) || defined(SDMMC2)
 #if defined(SDMMC1)
@@ -574,14 +612,28 @@ __weak void BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params)
   HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_cmd), STM_GPIO_PIN(SD_PinNames.pin_cmd));
   HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_ck), STM_GPIO_PIN(SD_PinNames.pin_ck));
 #if defined(SDMMC1) || defined(SDMMC2)
+#if !defined(SDMMC_CKIN_NA)
   if (SD_PinNames.pin_ckin != NC) {
     HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_ckin), STM_GPIO_PIN(SD_PinNames.pin_ckin));
+  }
+#endif
+#if !defined(SDMMC_CDIR_NA)
+  if (SD_PinNames.pin_cdir != NC) {
     HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_cdir), STM_GPIO_PIN(SD_PinNames.pin_cdir));
+  }
+#endif
+#if !defined(SDMMC_D0DIR_NA)
+  if (SD_PinNames.pin_d0dir != NC) {
     HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_d0dir), STM_GPIO_PIN(SD_PinNames.pin_d0dir));
+  }
+#endif
+#if !defined(SDMMC_D123DIR_NA)
+  if (SD_PinNames.pin_d123dir != NC) {
     HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_d123dir), STM_GPIO_PIN(SD_PinNames.pin_d123dir));
   }
 #endif
-#endif
+#endif /* SDMMC1 || SDMMC2 */
+#endif /* !STM32_CORE_VERSION || (STM32_CORE_VERSION <= 0x02050000) */
 
   /* Disable SD clock */
 #if defined(SDMMC1) || defined(SDMMC2)
