@@ -90,6 +90,28 @@ Please update the core or install previous library version."
 #define GPIO_PIN_All GPIO_PIN_ALL
 #endif
 
+/* Workaround while core does not defined *_NA for SDMMCx signals availability */
+#if defined(SDMMC1) || defined(SDMMC2)
+#if defined(STM32L4P5xx) || defined(STM32L4Q5xx) || defined(STM32L4R5xx) || defined(STM32L4R7xx) ||\
+    defined(STM32L4R9xx) || defined(STM32L4S5xx) || defined(STM32L4S7xx) || defined(STM32L4S9xx)
+#define STM32L4xx_PLUS
+#endif
+#if defined(STM32F7xx) || (defined(STM32L4xx) && !defined(STM32L4xx_PLUS))
+#if !defined(SDMMC_CKIN_NA)
+#define SDMMC_CKIN_NA
+#endif
+#if !defined(SDMMC_CDIR_NA)
+#define SDMMC_CDIR_NA
+#endif
+#if !defined(SDMMC_D0DIR_NA)
+#define SDMMC_D0DIR_NA
+#endif
+#if !defined(SDMMC_D123DIR_NA)
+#define SDMMC_D123DIR_NA
+#endif
+#endif /* STM32F7xx || STM32L4xx_PLUS */
+#endif /* SDMMC1 || SDMMC2 */
+
 /* Default SDx pins definitions */
 #ifndef SDX_D0
 #define SDX_D0           NUM_DIGITAL_PINS
