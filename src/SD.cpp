@@ -243,6 +243,37 @@ File::File(FRESULT result /* = FR_OK */)
   _res = result;
 }
 
+File::File(File &&other)
+{
+  _name = other._name;
+  _fil = other._fil;
+  _dir = other._dir;
+  _res = other._res;
+  other._name = NULL;
+  other._fil = NULL;
+  other._dir = {};
+}
+
+File &File::operator=(File &&other)
+{
+  close();
+
+  _name = other._name;
+  _fil = other._fil;
+  _dir = other._dir;
+  _res = other._res;
+  other._name = NULL;
+  other._fil = NULL;
+  other._dir = {};
+
+  return *this;
+}
+
+File::~File()
+{
+  close();
+}
+
 /** List directory contents to Serial.
  *
  * \param[in] flags The inclusive OR of

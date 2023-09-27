@@ -33,6 +33,15 @@ uint8_t const LS_R = 4;
 class File {
   public:
     File(FRESULT res = FR_OK);
+
+    File(const File &) = delete;
+    File &operator=(const File &) = delete;
+
+    File(File &&other);
+    File &operator=(File &&other);
+
+    virtual ~File();
+
     virtual size_t write(uint8_t);
     virtual size_t write(const uint8_t *buf, size_t size);
     virtual size_t write(const char *buf, size_t size);
