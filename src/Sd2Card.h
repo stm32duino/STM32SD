@@ -132,7 +132,7 @@ class Sd2Card {
     uint8_t type(void) const;
 
   private:
-    SD_CardInfo _SdCardInfo;
+    BSP_SD_CardInfo _SdCardInfo;
 
 };
 #endif  // sd2Card_h

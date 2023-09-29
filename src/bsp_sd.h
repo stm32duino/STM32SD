@@ -59,8 +59,9 @@ Please update the core or install previous library version."
 
 /*SD Card information structure */
 
-#define SD_CardInfo HAL_SD_CardInfoTypeDef
-
+#define BSP_SD_CardInfo HAL_SD_CardInfoTypeDef
+/* For backward compatibility */
+#define SD_CardInfo BSP_SD_CardInfo
 /*SD status structure definition */
 #define MSD_OK                   ((uint8_t)0x00)
 #define MSD_ERROR                ((uint8_t)0x01)
