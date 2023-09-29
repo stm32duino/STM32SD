@@ -1,46 +1,23 @@
-/**
-  *
-  *  Portions COPYRIGHT 2017 STMicroelectronics
-  *  Copyright (C) 2017, ChaN, all right reserved.
-  *
-  ******************************************************************************
-  *
-  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics International N.V.
-  * All rights reserved.</center></h2>
-  *
-  * Redistribution and use in source and binary forms, with or without
-  * modification, are permitted, provided that the following conditions are met:
-  *
-  * 1. Redistribution of source code must retain the above copyright notice,
-  *    this list of conditions and the following disclaimer.
-  * 2. Redistributions in binary form must reproduce the above copyright notice,
-  *    this list of conditions and the following disclaimer in the documentation
-  *    and/or other materials provided with the distribution.
-  * 3. Neither the name of STMicroelectronics nor the names of other
-  *    contributors to this software may be used to endorse or promote products
-  *    derived from this software without specific written permission.
-  * 4. This software, including modifications and/or derivative works of this
-  *    software, must execute solely and exclusively on microcontroller or
-  *    microprocessor devices manufactured by or for STMicroelectronics.
-  * 5. Redistribution and use of this software other than as permitted under
-  *    this license is void and will automatically terminate your rights under
-  *    this license.
-  *
-  * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT
-  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-  * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
-  * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT
-  * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
-  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
-  ******************************************************************************
-  */
+/*----------------------------------------------------------------------------/
+/  FatFs - Generic FAT file system module  R0.12c                             /
+/-----------------------------------------------------------------------------/
+/
+/ Copyright (C) 2017, ChaN, all right reserved.
+/ Portions Copyright (C) STMicroelectronics, all right reserved.
+/
+/ FatFs module is an open source software. Redistribution and use of FatFs in
+/ source and binary forms, with or without modification, are permitted provided
+/ that the following condition is met:
+
+/ 1. Redistributions of source code must retain the above copyright notice,
+/    this condition and the following disclaimer.
+/
+/ This software is provided by the copyright holder and contributors "AS IS"
+/ and any warranties related to this software are DISCLAIMED.
+/ The copyright owner or contributors be NOT LIABLE for any damages caused
+/ by use of this software.
+/----------------------------------------------------------------------------*/
+
 
 /*---------------------------------------------------------------------------/
 /  FatFs - FAT file system module configuration file
@@ -273,7 +250,7 @@
 /  These options have no effect at read-only configuration (_FS_READONLY = 1). */
 
 
-#define _FS_LOCK  0
+#define _FS_LOCK  2
 /* The option _FS_LOCK switches file lock function to control duplicated file open
 /  and illegal operation to open objects. This option must be 0 when _FS_READONLY
 /  is 1.
@@ -285,12 +262,31 @@
 /      lock control is independent of re-entrancy. */
 
 #define _FS_REENTRANT 0
+#define _USE_MUTEX  0
+/* Use CMSIS-OS mutexes as _SYNC_t object instead of Semaphores */
 
 #if _FS_REENTRANT
+
   #include "cmsis_os.h"
   #define _FS_TIMEOUT   1000
-  #define _SYNC_t         osSemaphoreId
-#endif
+
+  #if _USE_MUTEX
+
+    #if (osCMSIS < 0x20000U)
+      #define _SYNC_t         osMutexId
+    #else
+      #define _SYNC_t         osMutexId_t
+    #endif
+
+  #else
+    #if (osCMSIS < 0x20000U)
+      #define _SYNC_t         osSemaphoreId
+    #else
+      #define _SYNC_t         osSemaphoreId_t
+    #endif
+
+  #endif
+#endif //_FS_REENTRANT
 /* The option _FS_REENTRANT switches the re-entrancy (thread safe) of the FatFs
 /  module itself. Note that regardless of this option, file access to different
 /  volume is always re-entrant and volume control functions, f_mount(), f_mkfs()
@@ -311,6 +307,7 @@
 /* #include <windows.h> // O/S definitions  */
 
 #if _USE_LFN == 3
+
   #if !defined(ff_malloc) || !defined(ff_free)
     #include <stdlib.h>
   #endif
@@ -322,5 +319,23 @@
   #if !defined(ff_free)
     #define ff_free free
   #endif
+
+  /* by default the system malloc/free are used, but when the FreeRTOS is enabled
+  / the macros pvPortMalloc()/vportFree() to be used thus uncomment the code below
+  /
+  */
+  /*
+  #if !defined(ff_malloc) || !defined(ff_free)
+    #include "cmsis_os.h"
+  #endif
+
+  #if !defined(ff_malloc)
+    #define ff_malloc pvPortMalloc
+  #endif
+
+  #if !defined(ff_free)
+    #define ff_free vPortFree
+  #endif
+  */
 #endif
 /*--- End of configuration options ---*/
