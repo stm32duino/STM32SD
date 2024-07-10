@@ -251,6 +251,8 @@ void setup()
     MyFile.println();
     MyFile.println("This should be line 6");
     MyFile.println(str);
+    MyFile.print("This should be line ");
+    MyFile.println(8);
     Serial.println("OK");
     Serial.print("Closing 'ARDUINO/SD/PRINT.txt' file");
     Serial.println("OK");
@@ -291,7 +293,26 @@ void setup()
   } else {
     Serial.println("KO --> Error to open 'ARDUINO/SD/WRITE.txt' file");
   }
+
+  /* Test readBytes(buf, len) method */
+  Serial.print("Opening 'ARDUINO/SD/WRITE.txt' file...");
+  MyFile = SD.open("ARDUINO/SD/WRITE.txt");
+  if (MyFile) {
+    Serial.println("OK");
+    Serial.print("  Reading 'ARDUINO/SD/WRITE.txt' file: ");
+    bytesread = MyFile.readBytes(rtext, MyFile.size());
+    Serial.print(bytesread);
+    Serial.println(" bytes read");
+    Serial.println((const char*)rtext);
+    Serial.print("Closing 'ARDUINO/SD/WRITE.txt' file...");
+    MyFile.close();
+    Serial.println("OK");
+  } else {
+    Serial.println("KO --> Error to open 'ARDUINO/SD/WRITE.txt' file");
+  }
   Serial.println("###### End of the SD tests ######");
+
+
 }
 
 void loop()

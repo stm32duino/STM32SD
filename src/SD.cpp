@@ -548,47 +548,6 @@ size_t File::write(const uint8_t *buf, size_t size)
 }
 
 /**
-  * @brief  Print data to the file
-  * @param  data: Data to write to the file
-  * @retval Number of data written (1)
-  */
-size_t File::print(const char *data)
-{
-  return write(data, strlen(data));
-}
-
-/**
-  * @brief  Print data to the file
-  * @retval Number of data written (1)
-  */
-size_t File::println()
-{
-  return write("\r\n", 2);
-}
-
-/**
-  * @brief  Print data to the file
-  * @param  data: Data to write to the file
-  * @retval Number of data written (1)
-  */
-size_t File::println(const char *data)
-{
-  size_t bytewritten = write(data, strlen(data));
-  bytewritten += println();
-  return bytewritten;
-}
-
-/**
-  * @brief  Print data to the file
-  * @param  data: Data of type String to write to the file
-  * @retval Number of data written (1)
-  */
-size_t File::println(String &data)
-{
-  return println(data.c_str());
-}
-
-/**
   * @brief  Check if there are any bytes available for reading from the file
   * @retval Number of bytes available
   */
