@@ -30,7 +30,7 @@ uint8_t const LS_SIZE = 2;
 /** ls() flag for recursive list of subdirectories */
 uint8_t const LS_R = 4;
 
-class File {
+class File : public Stream {
   public:
     File(FRESULT res = FR_OK);
     virtual size_t write(uint8_t);
@@ -57,11 +57,6 @@ class File {
     File openNextFile(uint8_t mode = FILE_READ);
     void rewindDirectory(void);
 
-    virtual size_t print(const char *data);
-    virtual size_t println();
-    virtual size_t println(const char *data);
-    virtual size_t println(String &data);
-
     // Print to Serial line
     void ls(uint8_t flags, uint8_t indent = 0);
     static void printFatDate(uint16_t fatDate);
@@ -78,6 +73,8 @@ class File {
     {
       return _res;
     }
+    using Print::println;
+    using Print::print;
 
 };
 
