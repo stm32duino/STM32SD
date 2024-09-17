@@ -22,6 +22,10 @@
 #include "Sd2Card.h"
 #include "SdFatFs.h"
 
+#ifndef HAL_SD_MODULE_ENABLED
+  #error "HAL_SD_MODULE_ENABLED is required"
+#endif
+
 // flags for ls()
 /** ls() flag to print modify date */
 uint8_t const LS_DATE = 1;
