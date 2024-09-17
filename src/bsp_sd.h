@@ -174,8 +174,7 @@ uint8_t BSP_SD_DeInit(void);
 #if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
 uint8_t BSP_SD_TransceiverPin(GPIO_TypeDef *enport, uint32_t enpin, GPIO_TypeDef *selport, uint32_t selpin);
 #endif
-uint8_t BSP_SD_DetectPin(GPIO_TypeDef *port, uint32_t pin, uint32_t level);
-uint8_t BSP_SD_DetectITConfig(void (*callback)(void));
+uint8_t BSP_SD_DetectPin(PinName p, uint32_t level);
 uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint32_t ReadAddr, uint32_t NumOfBlocks, uint32_t Timeout);
 uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint32_t WriteAddr, uint32_t NumOfBlocks, uint32_t Timeout);
 uint8_t BSP_SD_Erase(uint64_t StartAddr, uint64_t EndAddr);
