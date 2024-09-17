@@ -22,7 +22,9 @@ jobs:
           - STMicroelectronics:stm32:Nucleo_144:pnum=NUCLEO_F207ZG
           - STMicroelectronics:stm32:GenF4:pnum=FEATHER_F405
           - STMicroelectronics:stm32:Disco:pnum=DISCO_F746NG
+          - STMicroelectronics:stm32:Disco:pnum=STM32H573I_DK
           - STMicroelectronics:stm32:GenH7:pnum=DAISY_PATCH_SM
+          - STMicroelectronics:stm32:GenL1:pnum=GENERIC_L151ZDTX
           - STMicroelectronics:stm32:Eval:pnum=STEVAL_MKSBOX1V1,usb=CDCgen
           - STMicroelectronics:stm32:Nucleo_144:pnum=NUCLEO_L552ZE_Q
           - STMicroelectronics:stm32:Nucleo_144:pnum=NUCLEO_U575ZI_Q
