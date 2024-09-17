@@ -37,35 +37,23 @@
 #include <Arduino.h>
 #include "Sd2Card.h"
 
+/**
+  * @brief  Default constructor. Use default pins definition.
+  */
+Sd2Card::Sd2Card()
+{
+  setDx(SDX_D0, SDX_D1, SDX_D2, SDX_D3);
+  setCK(SDX_CK);
+  setCMD(SDX_CMD);
 #if defined(SDMMC1) || defined(SDMMC2)
-bool Sd2Card::init(uint32_t data0, uint32_t data1, uint32_t data2, uint32_t data3, uint32_t ck, uint32_t cmd,
-                   uint32_t ckin, uint32_t cdir, uint32_t d0dir, uint32_t d123dir)
-{
-  return init(SD_DETECT_NONE, data0, data1, data2, data3, ck, cmd, ckin, cdir, d0dir, d123dir);
-}
-#else
-bool Sd2Card::init(uint32_t data0, uint32_t data1, uint32_t data2, uint32_t data3, uint32_t ck, uint32_t cmd)
-{
-  return init(SD_DETECT_NONE, data0, data1, data2, data3, ck, cmd);
-}
+  setCKIN(SDX_CKIN);
+  setCDIR(SDX_CDIR);
+  setDxDIR(SDX_D0DIR, SDX_D123DIR);
 #endif
+}
 
-#if defined(SDMMC1) || defined(SDMMC2)
-bool Sd2Card::init(uint32_t detect, uint32_t data0, uint32_t data1, uint32_t data2, uint32_t data3,
-                   uint32_t ck, uint32_t cmd, uint32_t ckin, uint32_t cdir, uint32_t d0dir, uint32_t d123dir)
-#else
-bool Sd2Card::init(uint32_t detect, uint32_t data0, uint32_t data1, uint32_t data2, uint32_t data3,
-                   uint32_t ck, uint32_t cmd)
-#endif
+bool Sd2Card::init(uint32_t detect)
 {
-  setDx(data0, data1, data2, data3);
-  setCK(ck);
-  setCMD(cmd);
-#if defined(SDMMC1) || defined(SDMMC2)
-  setCKIN(ckin);
-  setCDIR(cdir);
-  setDxDIR(d0dir, d123dir);
-#endif
   if (detect != SD_DETECT_NONE) {
     PinName p = digitalPinToPinName(detect);
     if ((p == NC) || \

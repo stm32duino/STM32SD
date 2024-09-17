@@ -145,31 +145,44 @@ uint8_t BSP_SD_GetInstance(void)
   SD_TypeDef *sd_cmd = NP;
   SD_TypeDef *sd_ck = NP;
 
+  /* If a pin is not defined, use the first pin available in the associated PinMap_SD_* arrays */
   if (SD_PinNames.pin_d0 == NC) {
-    /* No pin defined assume to use first pin available in each PinMap_SD_* arrays */
     SD_PinNames.pin_d0 = PinMap_SD_DATA0[0].pin;
 #if SD_BUS_WIDE == SD_BUS_WIDE_4B
     SD_PinNames.pin_d1 = PinMap_SD_DATA1[0].pin;
     SD_PinNames.pin_d2 = PinMap_SD_DATA2[0].pin;
     SD_PinNames.pin_d3 = PinMap_SD_DATA3[0].pin;
 #endif
+  }
+  if (SD_PinNames.pin_cmd == NC) {
     SD_PinNames.pin_cmd = PinMap_SD_CMD[0].pin;
+  }
+  if (SD_PinNames.pin_ck == NC) {
     SD_PinNames.pin_ck = PinMap_SD_CK[0].pin;
+  }
 #if defined(SDMMC1) || defined(SDMMC2)
 #if !defined(SDMMC_CKIN_NA)
+  if (SD_PinNames.pin_ckin == NC) {
     SD_PinNames.pin_ckin = PinMap_SD_CKIN[0].pin;
+  }
 #endif
 #if !defined(SDMMC_CDIR_NA)
+  if (SD_PinNames.pin_cdir == NC) {
     SD_PinNames.pin_cdir = PinMap_SD_CDIR[0].pin;
+  }
 #endif
 #if !defined(SDMMC_D0DIR_NA)
+  if (SD_PinNames.pin_d0dir == NC) {
     SD_PinNames.pin_d0dir = PinMap_SD_D0DIR[0].pin;
+  }
 #endif
 #if !defined(SDMMC_D123DIR_NA)
+  if (SD_PinNames.pin_d123dir == NC) {
     SD_PinNames.pin_d123dir = PinMap_SD_D123DIR[0].pin;
+  }
 #endif
 #endif /* SDMMC1 || SDMMC2 */
-  }
+
   /* Get SD instance from pins */
   sd_d0 = pinmap_peripheral(SD_PinNames.pin_d0, PinMap_SD_DATA0);
 #if SD_BUS_WIDE == SD_BUS_WIDE_4B
