@@ -57,7 +57,6 @@
   #define SD_CLK_PWR_SAVE          SDMMC_CLOCK_POWER_SAVE_DISABLE
   #define SD_BUS_WIDE_1B           SDMMC_BUS_WIDE_1B
   #define SD_BUS_WIDE_4B           SDMMC_BUS_WIDE_4B
-  #define SD_BUS_WIDE_8B           SDMMC_BUS_WIDE_8B
   #define SD_HW_FLOW_CTRL_ENABLE   SDMMC_HARDWARE_FLOW_CONTROL_ENABLE
   #define SD_HW_FLOW_CTRL_DISABLE  SDMMC_HARDWARE_FLOW_CONTROL_DISABLE
 
@@ -88,7 +87,6 @@
   #define SD_CLK_PWR_SAVE          SDIO_CLOCK_POWER_SAVE_DISABLE
   #define SD_BUS_WIDE_1B           SDIO_BUS_WIDE_1B
   #define SD_BUS_WIDE_4B           SDIO_BUS_WIDE_4B
-  #define SD_BUS_WIDE_8B           SDIO_BUS_WIDE_8B
   #define SD_HW_FLOW_CTRL_ENABLE   SDIO_HARDWARE_FLOW_CONTROL_ENABLE
   #define SD_HW_FLOW_CTRL_DISABLE  SDIO_HARDWARE_FLOW_CONTROL_DISABLE
   #ifndef SD_CLK_DIV
@@ -150,9 +148,11 @@ uint8_t BSP_SD_GetInstance(void)
   if (SD_PinNames.pin_d0 == NC) {
     /* No pin defined assume to use first pin available in each PinMap_SD_* arrays */
     SD_PinNames.pin_d0 = PinMap_SD_DATA0[0].pin;
+#if SD_BUS_WIDE == SD_BUS_WIDE_4B
     SD_PinNames.pin_d1 = PinMap_SD_DATA1[0].pin;
     SD_PinNames.pin_d2 = PinMap_SD_DATA2[0].pin;
     SD_PinNames.pin_d3 = PinMap_SD_DATA3[0].pin;
+#endif
     SD_PinNames.pin_cmd = PinMap_SD_CMD[0].pin;
     SD_PinNames.pin_ck = PinMap_SD_CK[0].pin;
 #if defined(SDMMC1) || defined(SDMMC2)
@@ -172,15 +172,20 @@ uint8_t BSP_SD_GetInstance(void)
   }
   /* Get SD instance from pins */
   sd_d0 = pinmap_peripheral(SD_PinNames.pin_d0, PinMap_SD_DATA0);
+#if SD_BUS_WIDE == SD_BUS_WIDE_4B
   sd_d1 = pinmap_peripheral(SD_PinNames.pin_d1, PinMap_SD_DATA1);
   sd_d2 = pinmap_peripheral(SD_PinNames.pin_d2, PinMap_SD_DATA2);
   sd_d3 = pinmap_peripheral(SD_PinNames.pin_d3, PinMap_SD_DATA3);
-
+#endif
   sd_cmd = pinmap_peripheral(SD_PinNames.pin_cmd, PinMap_SD_CMD);
   sd_ck = pinmap_peripheral(SD_PinNames.pin_ck, PinMap_SD_CK);
 
   /* Pins Dx/cmd/CK must not be NP. */
-  if (sd_d0 == NP || sd_d1 == NP || sd_d2 == NP || sd_d3 == NP || sd_cmd == NP || sd_ck == NP) {
+  if (sd_d0 == NP ||
+#if SD_BUS_WIDE == SD_BUS_WIDE_4B
+      sd_d1 == NP || sd_d2 == NP || sd_d3 == NP ||
+#endif
+      sd_cmd == NP || sd_ck == NP) {
     core_debug("ERROR: at least one SD pin has no peripheral\n");
     return MSD_ERROR;
   }
@@ -190,7 +195,11 @@ uint8_t BSP_SD_GetInstance(void)
   SD_TypeDef *sd_cx = pinmap_merge_peripheral(sd_cmd, sd_ck);
   SD_TypeDef *sd_dx = pinmap_merge_peripheral(sd_d01, sd_d23);
   SD_TypeDef *sd_base = pinmap_merge_peripheral(sd_dx, sd_cx);
-  if (sd_d01 == NP || sd_d23 == NP || sd_cx == NP || sd_dx == NP || sd_base == NP) {
+  if (sd_d01 == NP  ||
+#if SD_BUS_WIDE == SD_BUS_WIDE_4B
+      sd_d23 == NP ||
+#endif
+      sd_cx == NP || sd_dx == NP || sd_base == NP) {
     core_debug("ERROR: SD pins mismatch\n");
     return MSD_ERROR;
   }
@@ -522,9 +531,11 @@ __weak void BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params)
 #else
   /* Configure SD GPIO pins */
   pinmap_pinout(SD_PinNames.pin_d0, PinMap_SD_DATA0);
+#if SD_BUS_WIDE == SD_BUS_WIDE_4B
   pinmap_pinout(SD_PinNames.pin_d1, PinMap_SD_DATA1);
   pinmap_pinout(SD_PinNames.pin_d2, PinMap_SD_DATA2);
   pinmap_pinout(SD_PinNames.pin_d3, PinMap_SD_DATA3);
+#endif
   pinmap_pinout(SD_PinNames.pin_cmd, PinMap_SD_CMD);
   pinmap_pinout(SD_PinNames.pin_ck, PinMap_SD_CK);
 #if defined(SDMMC1) || defined(SDMMC2)

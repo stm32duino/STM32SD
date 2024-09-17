@@ -144,7 +144,6 @@ By default, if no pins are explicitly defined, the first one from each array is 
 * `SD_BUS_WIDE`: specifies the SDMMC bus width
   * `SD_BUS_WIDE_1B`
   * `SD_BUS_WIDE_4B` (default)
-  * `SD_BUS_WIDE_8B`
 
 * `SD_CLK_DIV`: specifies the clock frequency of the SDMMC controller (0-255)
   * `SDIO_TRANSFER_CLK_DIV` (default) for `SDIO`
