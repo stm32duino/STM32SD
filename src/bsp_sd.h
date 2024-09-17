@@ -115,35 +115,35 @@ Please update the core or install previous library version."
 
 /* Default SDx pins definitions */
 #ifndef SDX_D0
-#define SDX_D0           NUM_DIGITAL_PINS
+#define SDX_D0           PNUM_NOT_DEFINED
 #endif
 #ifndef SDX_D1
-#define SDX_D1           NUM_DIGITAL_PINS
+#define SDX_D1           PNUM_NOT_DEFINED
 #endif
 #ifndef SDX_D2
-#define SDX_D2           NUM_DIGITAL_PINS
+#define SDX_D2           PNUM_NOT_DEFINED
 #endif
 #ifndef SDX_D3
-#define SDX_D3           NUM_DIGITAL_PINS
+#define SDX_D3           PNUM_NOT_DEFINED
 #endif
 #ifndef SDX_CMD
-#define SDX_CMD          NUM_DIGITAL_PINS
+#define SDX_CMD          PNUM_NOT_DEFINED
 #endif
 #ifndef SDX_CK
-#define SDX_CK           NUM_DIGITAL_PINS
+#define SDX_CK           PNUM_NOT_DEFINED
 #endif
 #if defined(SDMMC1) || defined(SDMMC2)
 #ifndef SDX_CKIN
-#define SDX_CKIN         NUM_DIGITAL_PINS
+#define SDX_CKIN         PNUM_NOT_DEFINED
 #endif
 #ifndef SDX_CDIR
-#define SDX_CDIR         NUM_DIGITAL_PINS
+#define SDX_CDIR         PNUM_NOT_DEFINED
 #endif
 #ifndef SDX_D0DIR
-#define SDX_D0DIR        NUM_DIGITAL_PINS
+#define SDX_D0DIR        PNUM_NOT_DEFINED
 #endif
 #ifndef SDX_D123DIR
-#define SDX_D123DIR      NUM_DIGITAL_PINS
+#define SDX_D123DIR      PNUM_NOT_DEFINED
 #endif
 #endif /* SDMMC1 || SDMMC2 */
 

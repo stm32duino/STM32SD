@@ -38,7 +38,9 @@ Some default definitions can be overridden using:
 
 #### SDIO/SDMMC pins definition
 
-Since STM32 core v2.6.0, the `PinMap_SD[]` array defined in the `PeripheralPins*.c` has been split per signals:
+> [!IMPORTANT]
+> Since STM32 core v2.6.0, the `PinMap_SD[]` array defined in the `PeripheralPins*.c` has been split per signals:
+
 ```C
 PinMap_SD_CK[]
 PinMap_SD_DATA0[]
@@ -74,9 +76,11 @@ By default, if no pins are explicitly defined, the first one from each array is 
     * `SDX_D0DIR`
     * `SDX_D123DIR`
 
-* or redefine the default one before call of `begin()` of `SDClass` or `init()` of `Sd2Card`, use the following methods:
+* or redefine the default one before call of `begin()` of `SDClass` or `init()` of `Sd2Card`, using the following methods:
 
   * `setDx(uint32_t data0, uint32_t data1, uint32_t data2, uint32_t data3)`
+  > [!NOTE]
+  > If `SD_BUS_WIDE_1B` is used only `data0` is needed.
   * `setCK(uint32_t ck)`
   * `setCK(PinName ck)`
   * `setCMD(uint32_t cmd)`
@@ -104,31 +108,6 @@ By default, if no pins are explicitly defined, the first one from each array is 
   SD.setCMD(PB14);
   SD.setCK(PB_15); // using PinName
   SD.begin();
-```
-
-* or using the `begin()` of `SDClass` or `init()` of `Sd2Card` methods:
-
-  * For `SDIO`:
-    * `SDClass`:
-      * `begin(uint32_t data0, uint32_t data1, uint32_t data2, uint32_t data3, uint32_t ck, uint32_t cmd)`
-      * `begin(uint32_t detect = SD_DETECT_NONE, uint32_t data0 = SDX_D0, uint32_t data1 = SDX_D1, uint32_t data2 = SDX_D2, uint32_t data3 = SDX_D3, uint32_t ck = SDX_CK, uint32_t cmd = SDX_CMD, uint32_t ckin = SDX_CKIN, uint32_t cdir = SDX_CDIR, uint32_t d0dir = SDX_D0DIR, uint32_t d123dir = SDX_D123DIR);`
-    * `Sd2Card`:
-      * `init(uint32_t data0, uint32_t data1, uint32_t data2, uint32_t data3, uint32_t ck, uint32_t cmd)`
-      * `init(uint32_t detect = SD_DETECT_NONE, uint32_t data0 = SDX_D0, uint32_t data1 = SDX_D1, uint32_t data2 = SDX_D2, uint32_t data3 = SDX_D3, uint32_t ck = SDX_CK, uint32_t cmd = SDX_CMD);`
-
-  * For `SDMMC`:
-    * `SDClass`:
-      * `begin(uint32_t data0, uint32_t data1, uint32_t data2, uint32_t data3, uint32_t ck, uint32_t cmd, uint32_t ckin,  uint32_t cdir, uint32_t d0dir, uint32_t d123dir);`
-      * `begin(uint32_t detect = SD_DETECT_NONE, uint32_t data0 = SDX_D0, uint32_t data1 = SDX_D1, uint32_t data2 = SDX_D2, uint32_t data3 = SDX_D3, uint32_t ck = SDX_CK, uint32_t cmd = SDX_CMD, uint32_t ckin = SDX_CKIN, uint32_t cdir = SDX_CDIR, uint32_t d0dir = SDX_D0DIR, uint32_t d123dir = SDX_D123DIR);`
-      *
-    * * `Sd2Card`:
-      * `init(uint32_t data0 = SDX_D0, uint32_t data1 = SDX_D1, uint32_t data2 = SDX_D2, uint32_t data3 = SDX_D3, uint32_t ck = SDX_CK, uint32_t cmd = SDX_CMD, uint32_t ckin = SDX_CKIN, uint32_t cdir = SDX_CDIR, uint32_t d0dir = SDX_D0DIR, uint32_t d123dir = SDX_D123DIR)`
-      * `init(uint32_t detect = SD_DETECT_NONE, uint32_t data0 = SDX_D0, uint32_t data1 = SDX_D1, uint32_t data2 = SDX_D2, uint32_t data3 = SDX_D3, uint32_t ck = SDX_CK, uint32_t cmd = SDX_CMD, uint32_t ckin = SDX_CKIN, uint32_t cdir = SDX_CDIR, uint32_t d0dir = SDX_D0DIR, uint32_t d123dir = SDX_D123DIR);`
-
-  *Code snippet:*
-```C++
-  card.init(PE12, PE13, PE14, PE15, PB14, PB15);
-  SD.begin(SD_DETECT_PIN, PE12, PE13, PE14, PE15, PB14, PB15);
 ```
 
 #### SD configurations

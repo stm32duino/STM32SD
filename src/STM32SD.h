@@ -86,23 +86,10 @@ class SDClass {
 
   public:
     /* Initialize the SD peripheral */
-#if defined(SDMMC1) || defined(SDMMC2)
-    bool begin(uint32_t data0, uint32_t data1, uint32_t data2, uint32_t data3, uint32_t ck, uint32_t cmd,
-               uint32_t ckin,  uint32_t cdir, uint32_t d0dir, uint32_t d123dir
-              );
-    bool begin(uint32_t detect = SD_DETECT_NONE, uint32_t data0 = SDX_D0, uint32_t data1 = SDX_D1,
-               uint32_t data2 = SDX_D2, uint32_t data3 = SDX_D3, uint32_t ck = SDX_CK, uint32_t cmd = SDX_CMD,
-               uint32_t ckin = SDX_CKIN, uint32_t cdir = SDX_CDIR, uint32_t d0dir = SDX_D0DIR, uint32_t d123dir = SDX_D123DIR
-              );
-#else
-    bool begin(uint32_t data0, uint32_t data1, uint32_t data2, uint32_t data3, uint32_t ck, uint32_t cmd);
-    bool begin(uint32_t detect = SD_DETECT_NONE, uint32_t data0 = SDX_D0, uint32_t data1 = SDX_D1,
-               uint32_t data2 = SDX_D2, uint32_t data3 = SDX_D3, uint32_t ck = SDX_CMD, uint32_t cmd = SDX_CMD
-              );
-#endif
+    bool begin(uint32_t detect = SD_DETECT_NONE);
 
     // set* have to be called before begin()
-    void setDx(uint32_t data0, uint32_t data1, uint32_t data2, uint32_t data3)
+    void setDx(uint32_t data0, uint32_t data1 = PNUM_NOT_DEFINED, uint32_t data2 = PNUM_NOT_DEFINED, uint32_t data3 = PNUM_NOT_DEFINED)
     {
       _card.setDx(data0, data1, data2, data3);
     };
@@ -115,7 +102,7 @@ class SDClass {
       _card.setCMD(cmd);
     };
 
-    void setDx(PinName data0, PinName data1, PinName data2, PinName data3)
+    void setDx(PinName data0, PinName data1 = NC, PinName data2 = NC, PinName data3 = NC)
     {
       _card.setDx(data0, data1, data2, data3);
     };
