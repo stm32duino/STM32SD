@@ -58,14 +58,15 @@ SDClass SD;
 
 /**
   * @brief  Link SD, register the file system object to the FatFs mode and configure
-  *         relatives SD IOs including SD Detect Pin if any
+  *         relatives SD IOs including SD Detect Pin and level if any
   * @param  detect: detect pin number (default SD_DETECT_NONE)
+  * @param  level: detect pin level (default SD_DETECT_LEVEL)
   * @retval true or false
   */
-bool SDClass::begin(uint32_t detect)
+bool SDClass::begin(uint32_t detect, uint32_t level)
 {
   /*##-1- Initializes SD IOs #############################################*/
-  if (_card.init(detect)) {
+  if (_card.init(detect, level)) {
     return _fatFs.init();
   }
   return false;

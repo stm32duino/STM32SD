@@ -54,7 +54,7 @@ class Sd2Card {
   public:
     Sd2Card();
 
-    bool init(uint32_t detect = SD_DETECT_NONE);
+    bool init(uint32_t detect = SD_DETECT_NONE, uint32_t level = SD_DETECT_LEVEL);
 
     // set* have to be called before init()
     void setDx(uint32_t data0, uint32_t data1 = PNUM_NOT_DEFINED, uint32_t data2 = PNUM_NOT_DEFINED, uint32_t data3 = PNUM_NOT_DEFINED)

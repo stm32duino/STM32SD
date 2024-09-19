@@ -139,5 +139,5 @@ By default, if no pins are explicitly defined, the first one from each array is 
 
 #### SD detect and timeout
 * `SD_DETECT_PIN` pin number
-
+* `SD_DETECT_LEVEL` default `LOW`
 * `SD_DATATIMEOUT` constant for Read/Write block

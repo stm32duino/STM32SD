@@ -86,7 +86,7 @@ class SDClass {
 
   public:
     /* Initialize the SD peripheral */
-    bool begin(uint32_t detect = SD_DETECT_NONE);
+    bool begin(uint32_t detect = SD_DETECT_NONE, uint32_t level = SD_DETECT_LEVEL);
 
     // set* have to be called before begin()
     void setDx(uint32_t data0, uint32_t data1 = PNUM_NOT_DEFINED, uint32_t data2 = PNUM_NOT_DEFINED, uint32_t data3 = PNUM_NOT_DEFINED)
