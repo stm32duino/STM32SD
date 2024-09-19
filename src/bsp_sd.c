@@ -108,6 +108,7 @@
 static SD_HandleTypeDef uSdHandle;
 static uint32_t SD_detect_ll_gpio_pin = LL_GPIO_PIN_ALL;
 static GPIO_TypeDef *SD_detect_gpio_port = GPIOA;
+static uint32_t SD_detect_level = SD_DETECT_LEVEL;
 #if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
   static uint32_t SD_trans_en_ll_gpio_pin = LL_GPIO_PIN_ALL;
   static GPIO_TypeDef *SD_trans_en_gpio_port = GPIOA;
@@ -379,16 +380,18 @@ uint8_t BSP_SD_TransceiverPin(GPIO_TypeDef *enport, uint32_t enpin, GPIO_TypeDef
 #endif
 
 /**
-  * @brief  Set the SD card device detect pin and port.
+  * @brief  Set the SD card device detect pin, port and level.
   * @param  port one of the gpio port
   * @param  pin one of the gpio pin
+  * @param  level the level of the detect pin (HIGH or LOW)
   * @retval SD status
   */
-uint8_t BSP_SD_DetectPin(GPIO_TypeDef *port, uint32_t pin)
+uint8_t BSP_SD_DetectPin(GPIO_TypeDef *port, uint32_t pin, uint32_t level)
 {
   if (port != 0) {
     SD_detect_ll_gpio_pin = pin;
     SD_detect_gpio_port = port;
+    SD_detect_level = level;
     return MSD_OK;
   }
   return MSD_ERROR;
@@ -469,12 +472,8 @@ uint8_t BSP_SD_DetectITConfig(void (*callback)(void))
  */
 uint8_t BSP_SD_IsDetected(void)
 {
-  uint8_t  status = SD_NOT_PRESENT;
   /* Check SD card detect pin */
-  if (!LL_GPIO_IsInputPinSet(SD_detect_gpio_port, SD_detect_ll_gpio_pin)) {
-    status = SD_PRESENT;
-  }
-  return status;
+  return (LL_GPIO_IsInputPinSet(SD_detect_gpio_port, SD_detect_ll_gpio_pin) == SD_detect_level) ? SD_PRESENT : SD_NOT_PRESENT;
 }
 
 /**

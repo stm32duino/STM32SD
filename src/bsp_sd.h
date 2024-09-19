@@ -47,6 +47,7 @@ extern "C" {
 #include "PinNames.h"
 #include "stm32_def.h"
 #include "variant.h"
+#include "wiring_constants.h"
 #if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION  <= 0x01060100)
 #error "This library version required a STM32 core version > 1.6.1.\
 Please update the core or install previous library version."
@@ -73,6 +74,9 @@ Please update the core or install previous library version."
 #define SD_DETECT_NONE           NUM_DIGITAL_PINS
 
 /* Could be redefined in variant.h or using build_opt.h */
+#ifndef SD_DETECT_LEVEL
+#define SD_DETECT_LEVEL          LOW
+#endif
 #ifndef SD_DATATIMEOUT
 #define SD_DATATIMEOUT         100000000U
 #endif
@@ -170,7 +174,7 @@ uint8_t BSP_SD_DeInit(void);
 #if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
 uint8_t BSP_SD_TransceiverPin(GPIO_TypeDef *enport, uint32_t enpin, GPIO_TypeDef *selport, uint32_t selpin);
 #endif
-uint8_t BSP_SD_DetectPin(GPIO_TypeDef *port, uint32_t pin);
+uint8_t BSP_SD_DetectPin(GPIO_TypeDef *port, uint32_t pin, uint32_t level);
 uint8_t BSP_SD_DetectITConfig(void (*callback)(void));
 uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint32_t ReadAddr, uint32_t NumOfBlocks, uint32_t Timeout);
 uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint32_t WriteAddr, uint32_t NumOfBlocks, uint32_t Timeout);

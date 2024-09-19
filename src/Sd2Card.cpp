@@ -52,13 +52,13 @@ Sd2Card::Sd2Card()
 #endif
 }
 
-bool Sd2Card::init(uint32_t detect)
+bool Sd2Card::init(uint32_t detect, uint32_t level)
 {
   if (detect != SD_DETECT_NONE) {
     PinName p = digitalPinToPinName(detect);
     if ((p == NC) || \
         BSP_SD_DetectPin(set_GPIO_Port_Clock(STM_PORT(p)),
-                         STM_LL_GPIO_PIN(p)) != MSD_OK) {
+                         STM_LL_GPIO_PIN(p), level) != MSD_OK) {
       return false;
     }
   }
