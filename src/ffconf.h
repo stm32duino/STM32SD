@@ -12,7 +12,17 @@
 #if __has_include("ffconf_custom.h")
   #include "ffconf_custom.h"
 #else
-  #if _FATFS == 68300
+  #if defined(FF_DEFINED) && !defined(_FATFS)
+    #define _FATFS FF_DEFINED
+  #endif
+
+  #if _FATFS == 80286
+    /* Ensure backward compatibility with release prior to FatFs 0.14 */
+    /* Those flags are */
+    #define _USE_WRITE 1
+    #define _USE_IOCTL 1
+    #include "ffconf_default_80286.h"
+  #elif _FATFS == 68300
     #include "ffconf_default_68300.h"
   #else
     #include "ffconf_default_32020.h"
