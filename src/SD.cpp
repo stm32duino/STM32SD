@@ -138,7 +138,7 @@ File SDClass::open(const char *filepath, uint8_t mode /* = FA_READ */)
     Error_Handler();
   }
 
-#if _FATFS == 68300
+#if (_FATFS == 68300) || (_FATFS == 80286)
   file._fil->obj.fs = 0;
   file._dir.obj.fs = 0;
 #else
@@ -209,7 +209,7 @@ void File::ls(uint8_t flags, uint8_t indent)
   char *fn;
 
 #if _USE_LFN
-#if _FATFS == 68300
+#if (_FATFS == 68300) || (_FATFS == 80286)
   /* altname */
 #else
   static char lfn[_MAX_LFN];
@@ -226,7 +226,7 @@ void File::ls(uint8_t flags, uint8_t indent)
     if (fno.fname[0] == '.') {
       continue;
     }
-#if _USE_LFN && _FATFS != 68300
+#if _USE_LFN && (_FATFS != 68300 && _FATFS != 80286)
     fn = *fno.lfname ? fno.lfname : fno.fname;
 #else
     fn = fno.fname;
@@ -360,7 +360,7 @@ int File::read(void *buf, size_t len)
 void File::close()
 {
   if (_name) {
-#if _FATFS == 68300
+#if (_FATFS == 68300) || (_FATFS == 80286)
     if (_fil) {
       if (_fil->obj.fs != 0) {
 #else
@@ -377,7 +377,7 @@ void File::close()
       _fil = NULL;
     }
 
-#if _FATFS == 68300
+#if (_FATFS == 68300) || (_FATFS == 80286)
     if (_dir.obj.fs != 0) {
 #else
     if (_dir.fs != 0) {
@@ -459,7 +459,7 @@ uint32_t File::size()
 
 File::operator bool()
 {
-#if _FATFS == 68300
+#if (_FATFS == 68300) || (_FATFS == 80286)
   return !((_name == NULL) || ((_fil == NULL) && (_dir.obj.fs == 0)) || ((_fil != NULL) && (_fil->obj.fs == 0) && (_dir.obj.fs == 0)));
 #else
   return !((_name == NULL) || ((_fil == NULL) && (_dir.fs == 0)) || ((_fil != NULL) && (_fil->fs == 0) && (_dir.fs == 0)));
@@ -523,13 +523,13 @@ bool File::isDirectory()
   if (_name == NULL) {
     Error_Handler();
   }
-#if _FATFS == 68300
+#if (_FATFS == 68300) || (_FATFS == 80286)
   if (_dir.obj.fs != 0)
 #else
   if (_dir.fs != 0)
 #endif
     return true;
-#if _FATFS == 68300
+#if (_FATFS == 68300) || (_FATFS == 80286)
   else if (_fil->obj.fs != 0)
 #else
   else if (_fil->fs != 0)
@@ -550,7 +550,7 @@ File File::openNextFile(uint8_t mode)
   FRESULT res = FR_OK;
   FILINFO fno;
   char *fn;
-#if _USE_LFN && _FATFS != 68300
+#if _USE_LFN && (_FATFS != 68300 && _FATFS != 80286)
   static char lfn[_MAX_LFN];
   fno.lfname = lfn;
   fno.lfsize = sizeof(lfn);
@@ -563,7 +563,7 @@ File File::openNextFile(uint8_t mode)
     if (fno.fname[0] == '.') {
       continue;
     }
-#if _USE_LFN && _FATFS != 68300
+#if _USE_LFN && (_FATFS != 68300 && _FATFS != 80286)
     fn = *fno.lfname ? fno.lfname : fno.fname;
 #else
     fn = fno.fname;
@@ -589,7 +589,7 @@ File File::openNextFile(uint8_t mode)
 void File::rewindDirectory(void)
 {
   if (isDirectory()) {
-#if _FATFS == 68300
+#if (_FATFS == 68300) || (_FATFS == 80286)
     if (_dir.obj.fs != 0) {
 #else
     if (_dir.fs != 0) {
