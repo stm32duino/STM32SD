@@ -73,6 +73,20 @@ bool SDClass::begin(uint32_t detect, uint32_t level)
 }
 
 /**
+  * @brief  UnLink SD, unregister the file system object and unconfigure
+  *         relatives SD IOs including SD Detect Pin and level if any
+  * @retval true or false
+  */
+bool SDClass::end(void)
+{
+  /*##-1- DeInitializes SD IOs ###########################################*/
+  if (_fatFs.deinit()) {
+    return _card.deinit();
+  }
+  return false;
+}
+
+/**
   * @brief  Check if a file or folder exist on the SD disk
   * @param  filename: File name
   * @retval true or false

@@ -185,10 +185,12 @@ uint8_t BSP_SD_IsDetected(void);
 /* These __weak function can be surcharged by application code in case the current settings (e.g. DMA stream)
    need to be changed for specific needs */
 void    BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params);
-void    BSP_SD_Detect_MspInit(SD_HandleTypeDef *hsd, void *Params);
 void    BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params);
+void    BSP_SD_Detect_MspInit(SD_HandleTypeDef *hsd, void *Params);
+void    BSP_SD_Detect_MspDeInit(SD_HandleTypeDef *hsd, void *Params);
 #if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
 void    BSP_SD_Transceiver_MspInit(SD_HandleTypeDef *hsd, void *Params);
+void    BSP_SD_Transceiver_MspDeInit(SD_HandleTypeDef *hsd, void *Params);
 #endif
 
 #ifdef __cplusplus

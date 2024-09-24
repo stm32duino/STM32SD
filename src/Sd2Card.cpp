@@ -78,6 +78,14 @@ bool Sd2Card::init(uint32_t detect, uint32_t level)
   return false;
 }
 
+bool Sd2Card::deinit(void)
+{
+  if (BSP_SD_DeInit() == MSD_OK) {
+    return true;
+  }
+  return false;
+}
+
 uint8_t Sd2Card::type(void) const
 {
   uint8_t cardType = SD_CARD_TYPE_UKN;
