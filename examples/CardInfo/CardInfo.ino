@@ -20,15 +20,15 @@
 Sd2Card card;
 SdFatFs fatFs;
 
-void setup()
-{
+void setup() {
   bool disp = false;
   // Open serial communications and wait for port to open:
   Serial.begin(9600);
 
-  while (!Serial);
+  while (!Serial)
+    ;
   Serial.print("\nInitializing SD card...");
-  while(!card.init(SD_DETECT_PIN)) {
+  while (!card.init(SD_DETECT_PIN)) {
     if (!disp) {
       Serial.println("initialization failed. Is a card inserted?");
       disp = true;
@@ -66,9 +66,9 @@ void setup()
   Serial.println(fatFs.fatType(), DEC);
   Serial.println();
 
-  volumesize = fatFs.blocksPerCluster();    // clusters are collections of blocks
-  volumesize *= fatFs.clusterCount();       // we'll have a lot of clusters
-  volumesize *= 512;                        // SD card blocks are always 512 bytes
+  volumesize = fatFs.blocksPerCluster();  // clusters are collections of blocks
+  volumesize *= fatFs.clusterCount();     // we'll have a lot of clusters
+  volumesize *= 512;                      // SD card blocks are always 512 bytes
   Serial.print("Volume size (bytes): ");
   Serial.println(volumesize);
   Serial.print("Volume size (Kbytes): ");
@@ -85,6 +85,13 @@ void setup()
   // list all files in the card with date and size
   root.ls(LS_R | LS_DATE | LS_SIZE);
   root.close();
+  if (!fatFs.deinit()) {
+    Serial.println("Failed to deinit card");
+  }
+  if (!card.deinit()) {
+    Serial.println("Failed to deinit card");
+  }
+
   Serial.println("###### End of the SD tests ######");
 }
 
