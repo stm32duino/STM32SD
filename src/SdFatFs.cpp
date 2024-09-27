@@ -51,6 +51,19 @@ bool SdFatFs::init(void)
   return false;
 }
 
+bool SdFatFs::deinit(void)
+{
+  /*##-1- Unregister the file system object to the FatFs module ##############*/
+  if (f_unmount((TCHAR const *)_SDPath) == FR_OK) {
+    /*##-2- Unlink the SD disk I/O driver ####################################*/
+    if (FATFS_UnLinkDriver(_SDPath) == 0) {
+      /* FatFs deInitialization done */
+      return true;
+    }
+  }
+  return false;
+}
+
 uint8_t SdFatFs::fatType(void)
 {
   switch (_SDFatFs.fs_type) {

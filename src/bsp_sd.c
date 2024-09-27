@@ -354,6 +354,15 @@ uint8_t BSP_SD_DeInit(void)
   /* Msp SD deinitialization */
   BSP_SD_MspDeInit(&uSdHandle, NULL);
 
+
+  if (SD_detect_ll_gpio_pin != LL_GPIO_PIN_ALL) {
+    BSP_SD_Detect_MspDeInit(&uSdHandle, NULL);
+  }
+#if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
+  BSP_SD_Transceiver_MspDeInit(&uSdHandle, NULL);
+#endif
+
+
   return  sd_state;
 }
 
@@ -381,13 +390,14 @@ uint8_t BSP_SD_TransceiverPin(GPIO_TypeDef *enport, uint32_t enpin, GPIO_TypeDef
 
 /**
   * @brief  Set the SD card device detect pin, port and level.
-  * @param  port one of the gpio port
-  * @param  pin one of the gpio pin
+  * @param  p PinName of the detect pin
   * @param  level the level of the detect pin (HIGH or LOW)
   * @retval SD status
   */
-uint8_t BSP_SD_DetectPin(GPIO_TypeDef *port, uint32_t pin, uint32_t level)
+uint8_t BSP_SD_DetectPin(PinName p, uint32_t level)
 {
+  GPIO_TypeDef *port = set_GPIO_Port_Clock(STM_PORT(p));
+  uint32_t pin = STM_LL_GPIO_PIN(p);
   if (port != 0) {
     SD_detect_ll_gpio_pin = pin;
     SD_detect_gpio_port = port;
@@ -395,75 +405,6 @@ uint8_t BSP_SD_DetectPin(GPIO_TypeDef *port, uint32_t pin, uint32_t level)
     return MSD_OK;
   }
   return MSD_ERROR;
-}
-
-/**
-  * @brief  Configures Interrupt mode for SD detection pin.
-  * @retval Status
-  */
-uint8_t BSP_SD_DetectITConfig(void (*callback)(void))
-{
-  uint8_t sd_state = MSD_ERROR;
-  if (SD_detect_ll_gpio_pin != LL_GPIO_PIN_ALL) {
-    LL_GPIO_SetPinPull(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_PULL_UP);
-    uint16_t SD_detect_gpio_pin = GPIO_PIN_All;
-    switch (SD_detect_ll_gpio_pin) {
-      case LL_GPIO_PIN_0:
-        SD_detect_gpio_pin = GPIO_PIN_0;
-        break;
-      case LL_GPIO_PIN_1:
-        SD_detect_gpio_pin = GPIO_PIN_1;
-        break;
-      case LL_GPIO_PIN_2:
-        SD_detect_gpio_pin = GPIO_PIN_2;
-        break;
-      case LL_GPIO_PIN_3:
-        SD_detect_gpio_pin = GPIO_PIN_3;
-        break;
-      case LL_GPIO_PIN_4:
-        SD_detect_gpio_pin = GPIO_PIN_4;
-        break;
-      case LL_GPIO_PIN_5:
-        SD_detect_gpio_pin = GPIO_PIN_5;
-        break;
-      case LL_GPIO_PIN_6:
-        SD_detect_gpio_pin = GPIO_PIN_6;
-        break;
-      case LL_GPIO_PIN_7:
-        SD_detect_gpio_pin = GPIO_PIN_7;
-        break;
-      case LL_GPIO_PIN_8:
-        SD_detect_gpio_pin = GPIO_PIN_8;
-        break;
-      case LL_GPIO_PIN_9:
-        SD_detect_gpio_pin = GPIO_PIN_9;
-        break;
-      case LL_GPIO_PIN_10:
-        SD_detect_gpio_pin = GPIO_PIN_10;
-        break;
-      case LL_GPIO_PIN_11:
-        SD_detect_gpio_pin = GPIO_PIN_11;
-        break;
-      case LL_GPIO_PIN_12:
-        SD_detect_gpio_pin = GPIO_PIN_12;
-        break;
-      case LL_GPIO_PIN_13:
-        SD_detect_gpio_pin = GPIO_PIN_13;
-        break;
-      case LL_GPIO_PIN_14:
-        SD_detect_gpio_pin = GPIO_PIN_14;
-        break;
-      case LL_GPIO_PIN_15:
-        SD_detect_gpio_pin = GPIO_PIN_15;
-        break;
-      default:
-        Error_Handler();
-        break;
-    }
-    stm32_interrupt_enable(SD_detect_gpio_port, SD_detect_gpio_pin, callback, GPIO_MODE_IT_RISING_FALLING);
-    sd_state = MSD_OK;
-  }
-  return sd_state;
 }
 
 /**
@@ -592,26 +533,6 @@ __weak void BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params)
 }
 
 /**
-  * @brief  Initializes the SD Detect pin MSP.
-  * @param  hsd: SD handle
-  * @param  Params : pointer on additional configuration parameters, can be NULL.
-  */
-__weak void BSP_SD_Detect_MspInit(SD_HandleTypeDef *hsd, void *Params)
-{
-  UNUSED(hsd);
-  UNUSED(Params);
-
-  /* GPIO configuration in input for uSD_Detect signal */
-#ifdef LL_GPIO_SPEED_FREQ_VERY_HIGH
-  LL_GPIO_SetPinSpeed(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_SPEED_FREQ_VERY_HIGH);
-#else
-  LL_GPIO_SetPinSpeed(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_SPEED_FREQ_HIGH);
-#endif
-  LL_GPIO_SetPinMode(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_MODE_INPUT);
-  LL_GPIO_SetPinPull(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_PULL_UP);
-}
-
-/**
   * @brief  DeInitializes the SD MSP.
   * @param  hsd: SD handle
   * @param  Params : pointer on additional configuration parameters, can be NULL.
@@ -676,6 +597,47 @@ __weak void BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params)
 #endif
 }
 
+/**
+  * @brief  Initializes the SD Detect pin MSP.
+  * @param  hsd: SD handle
+  * @param  Params : pointer on additional configuration parameters, can be NULL.
+  */
+__weak void BSP_SD_Detect_MspInit(SD_HandleTypeDef *hsd, void *Params)
+{
+  UNUSED(hsd);
+  UNUSED(Params);
+
+  /* GPIO configuration in input for uSD_Detect signal */
+#ifdef LL_GPIO_SPEED_FREQ_VERY_HIGH
+  LL_GPIO_SetPinSpeed(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_SPEED_FREQ_VERY_HIGH);
+#else
+  LL_GPIO_SetPinSpeed(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_SPEED_FREQ_HIGH);
+#endif
+  LL_GPIO_SetPinMode(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_MODE_INPUT);
+  LL_GPIO_SetPinPull(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_PULL_UP);
+}
+
+/**
+  * @brief  DeInitializes the SD Detect pin MSP.
+  * @param  hsd: SD handle
+  * @param  Params : pointer on additional configuration parameters, can be NULL.
+  */
+__weak void BSP_SD_Detect_MspDeInit(SD_HandleTypeDef *hsd, void *Params)
+{
+  UNUSED(hsd);
+  UNUSED(Params);
+
+  /* GPIO configuration in analog to saves the consumption */
+  LL_GPIO_SetPinSpeed(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_SPEED_FREQ_LOW);
+#ifndef LL_GPIO_PULL_NO
+  /* For STM32F1xx */
+  LL_GPIO_SetPinPull(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_MODE_FLOATING);
+#else
+  LL_GPIO_SetPinPull(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_PULL_NO);
+#endif
+  LL_GPIO_SetPinMode(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_MODE_ANALOG);
+}
+
 #if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
 /**
   * @brief  Initializes the SD Transceiver pin MSP.
@@ -689,17 +651,44 @@ __weak void BSP_SD_Transceiver_MspInit(SD_HandleTypeDef *hsd, void *Params)
 
   LL_GPIO_SetPinSpeed(SD_trans_en_gpio_port, SD_trans_en_ll_gpio_pin, LL_GPIO_SPEED_FREQ_HIGH);
   LL_GPIO_SetPinMode(SD_trans_en_gpio_port, SD_trans_en_ll_gpio_pin, LL_GPIO_MODE_OUTPUT);
+#ifndef LL_GPIO_PULL_NO
+  /* For STM32F1xx */
+  LL_GPIO_SetPinPull(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_MODE_FLOATING);
+#else
   LL_GPIO_SetPinPull(SD_trans_en_gpio_port, SD_trans_en_ll_gpio_pin, LL_GPIO_PULL_NO);
-
+#endif
   LL_GPIO_SetPinSpeed(SD_trans_sel_gpio_port, SD_trans_sel_ll_gpio_pin, LL_GPIO_SPEED_FREQ_HIGH);
   LL_GPIO_SetPinMode(SD_trans_sel_gpio_port, SD_trans_sel_ll_gpio_pin, LL_GPIO_MODE_OUTPUT);
+#ifndef LL_GPIO_PULL_NO
+  /* For STM32F1xx */
+  LL_GPIO_SetPinPull(SD_detect_gpio_port, SD_detect_ll_gpio_pin, LL_GPIO_MODE_FLOATING);
+#else
   LL_GPIO_SetPinPull(SD_trans_sel_gpio_port, SD_trans_sel_ll_gpio_pin, LL_GPIO_PULL_NO);
-
+#endif
   /* Enable the level shifter */
   LL_GPIO_SetOutputPin(SD_trans_en_gpio_port, SD_trans_en_ll_gpio_pin);
 
   /* By default start with the default voltage */
   LL_GPIO_ResetOutputPin(SD_trans_sel_gpio_port, SD_trans_sel_ll_gpio_pin);
+}
+
+/**
+  * @brief  DeInitializes the SD Transceiver pin MSP.
+  * @param  hsd: SD handle
+  * @param  Params : pointer on additional configuration parameters, can be NULL.
+  */
+__weak void BSP_SD_Transceiver_MspDeInit(SD_HandleTypeDef *hsd, void *Params)
+{
+  UNUSED(hsd);
+  UNUSED(Params);
+
+  LL_GPIO_SetPinSpeed(SD_trans_en_gpio_port, SD_trans_en_ll_gpio_pin, LL_GPIO_SPEED_FREQ_LOW);
+  LL_GPIO_SetPinMode(SD_trans_en_gpio_port, SD_trans_en_ll_gpio_pin, LL_GPIO_MODE_ANALOG);
+  LL_GPIO_SetPinPull(SD_trans_en_gpio_port, SD_trans_en_ll_gpio_pin, LL_GPIO_PULL_NO);
+
+  LL_GPIO_SetPinSpeed(SD_trans_sel_gpio_port, SD_trans_sel_ll_gpio_pin, LL_GPIO_SPEED_FREQ_LOW);
+  LL_GPIO_SetPinMode(SD_trans_sel_gpio_port, SD_trans_sel_ll_gpio_pin, LL_GPIO_MODE_ANALOG);
+  LL_GPIO_SetPinPull(SD_trans_sel_gpio_port, SD_trans_sel_ll_gpio_pin, LL_GPIO_PULL_NO);
 }
 
 /**

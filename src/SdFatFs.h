@@ -82,6 +82,7 @@ class SdFatFs {
   public:
 
     bool init(void);
+    bool deinit(void);
 
     /** Return the FatFs type: 12, 16, 32 (0: unknown)*/
     uint8_t fatType(void);

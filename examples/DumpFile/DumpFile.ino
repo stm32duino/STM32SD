@@ -19,19 +19,17 @@
 #define SD_DETECT_PIN SD_DETECT_NONE
 #endif
 
-void setup()
-{
+void setup() {
   // Open serial communications and wait for port to open:
   Serial.begin(9600);
   while (!Serial) {
-    ; // wait for serial port to connect. Needed for Leonardo only
+    ;  // wait for serial port to connect. Needed for Leonardo only
   }
 
 
   Serial.print("Initializing SD card...");
   // see if the card is present and can be initialized:
-  while (!SD.begin(SD_DETECT_PIN))
-  {
+  while (!SD.begin(SD_DETECT_PIN)) {
     delay(10);
   }
   delay(100);
@@ -52,9 +50,11 @@ void setup()
   else {
     Serial.println("error opening datalog.txt");
   }
+  if (!SD.end()) {
+    Serial.println("Failed to properly end the SD.");
+  }
   Serial.println("###### End of the SD tests ######");
 }
 
-void loop()
-{
+void loop() {
 }

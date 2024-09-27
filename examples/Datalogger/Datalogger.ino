@@ -18,22 +18,20 @@
 #define SD_DETECT_PIN SD_DETECT_NONE
 #endif
 
-uint32_t A[] = { A0, A1, A2};
+uint32_t A[] = { A0, A1, A2 };
 
 File dataFile;
 
-void setup()
-{
+void setup() {
   // Open serial communications and wait for port to open:
   Serial.begin(9600);
   while (!Serial) {
-    ; // wait for serial port to connect. Needed for Leonardo only
+    ;  // wait for serial port to connect. Needed for Leonardo only
   }
 
   Serial.print("Initializing SD card...");
   // see if the card is present and can be initialized:
-  while (!SD.begin(SD_DETECT_PIN))
-  {
+  while (!SD.begin(SD_DETECT_PIN)) {
     delay(10);
   }
   delay(100);
@@ -52,8 +50,7 @@ void setup()
   }
 }
 
-void loop()
-{
+void loop() {
   // make a string for assembling the data to log:
   String dataString = "";
 
@@ -70,7 +67,7 @@ void loop()
   // if the file is available, write to it:
   if (dataFile) {
     dataFile.println(dataString);
-    dataFile.flush(); // use flush to ensure the data written
+    dataFile.flush();  // use flush to ensure the data written
     // print to the serial port too:
     Serial.println(dataString);
   }
