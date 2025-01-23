@@ -66,14 +66,24 @@ bool SdFatFs::deinit(void)
 
 uint8_t SdFatFs::fatType(void)
 {
+  uint8_t fatType = FAT_TYPE_UNK;
   switch (_SDFatFs.fs_type) {
+#if defined(FS_EXFAT)
+    case FS_EXFAT:
+      fatType = FAT_TYPE_EXFAT;
+      break;
+#endif
     case FS_FAT12:
-      return 12;
+      fatType = FAT_TYPE_FAT12;
+      break;
     case FS_FAT16:
-      return 16;
+      fatType = FAT_TYPE_FAT16;
+      break;
     case FS_FAT32:
-      return 32;
+      fatType = FAT_TYPE_FAT32;
+      break;
     default:
-      return 0;
+      fatType = FAT_TYPE_UNK;
   }
+  return fatType;
 }
