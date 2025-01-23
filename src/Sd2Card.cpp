@@ -54,36 +54,35 @@ Sd2Card::Sd2Card()
 
 bool Sd2Card::init(uint32_t detect, uint32_t level)
 {
+  bool status = true;
   if (detect != SD_DETECT_NONE) {
     PinName p = digitalPinToPinName(detect);
     if ((p == NC) || \
         BSP_SD_DetectPin(p, level) != MSD_OK) {
-      return false;
+      status = false;
     }
   }
 #if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
-  PinName sd_en = digitalPinToPinName(SD_TRANSCEIVER_EN);
-  PinName sd_sel = digitalPinToPinName(SD_TRANSCEIVER_SEL);
-  if (BSP_SD_TransceiverPin(set_GPIO_Port_Clock(STM_PORT(sd_en)),
-                            STM_LL_GPIO_PIN(sd_en),
-                            set_GPIO_Port_Clock(STM_PORT(sd_sel)),
-                            STM_LL_GPIO_PIN(sd_sel)) == MSD_ERROR) {
-    return false;
+  if (status == true) {
+    PinName sd_en = digitalPinToPinName(SD_TRANSCEIVER_EN);
+    PinName sd_sel = digitalPinToPinName(SD_TRANSCEIVER_SEL);
+    if (BSP_SD_TransceiverPin(set_GPIO_Port_Clock(STM_PORT(sd_en)),
+                              STM_LL_GPIO_PIN(sd_en),
+                              set_GPIO_Port_Clock(STM_PORT(sd_sel)),
+                              STM_LL_GPIO_PIN(sd_sel)) == MSD_ERROR) {
+      status = false;
+    }
   }
 #endif
-  if (BSP_SD_Init() == MSD_OK) {
-    BSP_SD_GetCardInfo(&_SdCardInfo);
-    return true;
+  if ((status == true) && (BSP_SD_Init() == MSD_OK)) {
+    status = BSP_SD_GetCardInfo(&_SdCardInfo);
   }
-  return false;
+  return status;
 }
 
 bool Sd2Card::deinit(void)
 {
-  if (BSP_SD_DeInit() == MSD_OK) {
-    return true;
-  }
-  return false;
+  return (BSP_SD_DeInit() == MSD_OK) ? true : false;
 }
 
 uint8_t Sd2Card::type(void) const
@@ -113,4 +112,3 @@ uint8_t Sd2Card::type(void) const
   }
   return cardType;
 }
-

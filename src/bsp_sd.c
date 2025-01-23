@@ -135,9 +135,9 @@ SD_PinName_t SD_PinNames = {
 #if defined(STM32_CORE_VERSION) && (STM32_CORE_VERSION > 0x02050000)
 /**
   * @brief  Get the SD card device instance from pins
-  * @retval SD status
+  * @retval boolean true if successful, false otherwise
   */
-uint8_t BSP_SD_GetInstance(void)
+bool BSP_SD_GetInstance(void)
 {
   SD_TypeDef *sd_d0 = NP;
   SD_TypeDef *sd_d1 = NP;
@@ -145,6 +145,7 @@ uint8_t BSP_SD_GetInstance(void)
   SD_TypeDef *sd_d3 = NP;
   SD_TypeDef *sd_cmd = NP;
   SD_TypeDef *sd_ck = NP;
+  bool res = true;
 
   /* If a pin is not defined, use the first pin available in the associated PinMap_SD_* arrays */
   if (SD_PinNames.pin_d0 == NC) {
@@ -201,67 +202,67 @@ uint8_t BSP_SD_GetInstance(void)
 #endif
       sd_cmd == NP || sd_ck == NP) {
     core_debug("ERROR: at least one SD pin has no peripheral\n");
-    return MSD_ERROR;
-  }
-
-  SD_TypeDef *sd_d01 = pinmap_merge_peripheral(sd_d0, sd_d1);
-  SD_TypeDef *sd_d23 = pinmap_merge_peripheral(sd_d2, sd_d3);
-  SD_TypeDef *sd_cx = pinmap_merge_peripheral(sd_cmd, sd_ck);
-  SD_TypeDef *sd_dx = pinmap_merge_peripheral(sd_d01, sd_d23);
-  SD_TypeDef *sd_base = pinmap_merge_peripheral(sd_dx, sd_cx);
-  if (sd_d01 == NP  ||
+    res = false;
+  } else {
+    SD_TypeDef *sd_d01 = pinmap_merge_peripheral(sd_d0, sd_d1);
+    SD_TypeDef *sd_d23 = pinmap_merge_peripheral(sd_d2, sd_d3);
+    SD_TypeDef *sd_cx = pinmap_merge_peripheral(sd_cmd, sd_ck);
+    SD_TypeDef *sd_dx = pinmap_merge_peripheral(sd_d01, sd_d23);
+    SD_TypeDef *sd_base = pinmap_merge_peripheral(sd_dx, sd_cx);
+    if (sd_d01 == NP  ||
 #if SD_BUS_WIDE == SD_BUS_WIDE_4B
-      sd_d23 == NP ||
+        sd_d23 == NP ||
 #endif
-      sd_cx == NP || sd_dx == NP || sd_base == NP) {
-    core_debug("ERROR: SD pins mismatch\n");
-    return MSD_ERROR;
-  }
-  uSdHandle.Instance = sd_base;
+        sd_cx == NP || sd_dx == NP || sd_base == NP) {
+      core_debug("ERROR: SD pins mismatch\n");
+      res = false;
+    }
+    uSdHandle.Instance = sd_base;
 #if defined(SDMMC1) || defined(SDMMC2)
 #if !defined(SDMMC_CKIN_NA)
-  if (SD_PinNames.pin_ckin != NC) {
-    SD_TypeDef *sd_ckin = pinmap_peripheral(SD_PinNames.pin_ckin, PinMap_SD_CKIN);
-    if (pinmap_merge_peripheral(sd_ckin, sd_base) == NP) {
-      core_debug("ERROR: SD CKIN pin mismatch\n");
-      return MSD_ERROR;
+    if (res && (SD_PinNames.pin_ckin != NC)) {
+      SD_TypeDef *sd_ckin = pinmap_peripheral(SD_PinNames.pin_ckin, PinMap_SD_CKIN);
+      if (pinmap_merge_peripheral(sd_ckin, sd_base) == NP) {
+        core_debug("ERROR: SD CKIN pin mismatch\n");
+        res = false;
+      }
     }
-  }
 #endif
 #if !defined(SDMMC_CDIR_NA)
-  if (SD_PinNames.pin_cdir != NC) {
-    SD_TypeDef *sd_cdir = pinmap_peripheral(SD_PinNames.pin_cdir, PinMap_SD_CDIR);
-    if (pinmap_merge_peripheral(sd_cdir, sd_base) == NP) {
-      core_debug("ERROR: SD CDIR pin mismatch\n");
-      return MSD_ERROR;
+    if ((res && SD_PinNames.pin_cdir != NC)) {
+      SD_TypeDef *sd_cdir = pinmap_peripheral(SD_PinNames.pin_cdir, PinMap_SD_CDIR);
+      if (pinmap_merge_peripheral(sd_cdir, sd_base) == NP) {
+        core_debug("ERROR: SD CDIR pin mismatch\n");
+        res = false;
+      }
     }
-  }
 #endif
 #if !defined(SDMMC_D0DIR_NA)
-  if (SD_PinNames.pin_cdir != NC) {
-    SD_TypeDef *sd_d0dir = pinmap_peripheral(SD_PinNames.pin_d0dir, PinMap_SD_D0DIR);
-    if (pinmap_merge_peripheral(sd_d0dir, sd_base) == NP) {
-      core_debug("ERROR: SD DODIR pin mismatch\n");
-      return MSD_ERROR;
+    if (res && (SD_PinNames.pin_cdir != NC)) {
+      SD_TypeDef *sd_d0dir = pinmap_peripheral(SD_PinNames.pin_d0dir, PinMap_SD_D0DIR);
+      if (pinmap_merge_peripheral(sd_d0dir, sd_base) == NP) {
+        core_debug("ERROR: SD DODIR pin mismatch\n");
+        res = false;
+      }
     }
-  }
 #endif
 #if !defined(SDMMC_D123DIR_NA)
-  if (SD_PinNames.pin_cdir != NC) {
-    SD_TypeDef *sd_d123dir = pinmap_peripheral(SD_PinNames.pin_d123dir, PinMap_SD_D123DIR);
-    if (pinmap_merge_peripheral(sd_d123dir, sd_base) == NP) {
-      core_debug("ERROR: SD D123DIR pin mismatch\n");
-      return MSD_ERROR;
+    if (res && (SD_PinNames.pin_cdir != NC)) {
+      SD_TypeDef *sd_d123dir = pinmap_peripheral(SD_PinNames.pin_d123dir, PinMap_SD_D123DIR);
+      if (pinmap_merge_peripheral(sd_d123dir, sd_base) == NP) {
+        core_debug("ERROR: SD D123DIR pin mismatch\n");
+        res = false;
+      }
     }
-  }
 #endif
 #endif /* SDMMC1 || SDMMC2 */
-  /* Are all pins connected to the same SDx instance? */
-  if (uSdHandle.Instance == NP) {
-    core_debug("ERROR: SD pins mismatch\n");
-    return MSD_ERROR;
+    /* Are all pins connected to the same SDx instance? */
+    if (uSdHandle.Instance == NP) {
+      core_debug("ERROR: SD pins mismatch\n");
+      res = false;
+    }
   }
-  return MSD_OK;
+  return res;
 }
 #endif /* STM32_CORE_VERSION && (STM32_CORE_VERSION > 0x02050000) */
 
@@ -279,8 +280,8 @@ uint8_t BSP_SD_Init(void)
 #if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION <= 0x02050000)
     uSdHandle.Instance = SD_INSTANCE;
 #else
-    if (BSP_SD_GetInstance() == MSD_ERROR) {
-      return MSD_ERROR;
+    if (!BSP_SD_GetInstance()) {
+      sd_state = MSD_ERROR;
     }
 #endif /* !STM32_CORE_VERSION || (STM32_CORE_VERSION <= 0x02050000) */
 
@@ -298,32 +299,33 @@ uint8_t BSP_SD_Init(void)
 #else
     uSdHandle.Init.TranceiverPresent   = SD_TRANSCEIVER_ENABLE;
 #endif
-    BSP_SD_Transceiver_MspInit(&uSdHandle, NULL);
+    if (sd_state == MSD_OK) {
+      BSP_SD_Transceiver_MspInit(&uSdHandle, NULL);
+    }
 #endif
 
-    if (SD_detect_ll_gpio_pin != LL_GPIO_PIN_ALL) {
+    if ((sd_state == MSD_OK) && (SD_detect_ll_gpio_pin != LL_GPIO_PIN_ALL)) {
       /* Msp SD Detect pin initialization */
       BSP_SD_Detect_MspInit(&uSdHandle, NULL);
       if (BSP_SD_IsDetected() != SD_PRESENT) { /* Check if SD card is present */
-        return MSD_ERROR_SD_NOT_PRESENT;
+        sd_state = MSD_ERROR_SD_NOT_PRESENT;
       }
     }
-
-    /* Msp SD initialization */
-    BSP_SD_MspInit(&uSdHandle, NULL);
-
-    /* HAL SD initialization */
-    if (HAL_SD_Init(&uSdHandle) != HAL_OK) {
-      sd_state = MSD_ERROR;
-    }
-
-    /* Configure SD Bus width */
     if (sd_state == MSD_OK) {
-      /* Enable wide operation */
-      if (HAL_SD_ConfigWideBusOperation(&uSdHandle, SD_BUS_WIDE) != HAL_OK) {
+      /* Msp SD initialization */
+      BSP_SD_MspInit(&uSdHandle, NULL);
+
+      /* HAL SD initialization */
+      if (HAL_SD_Init(&uSdHandle) != HAL_OK) {
         sd_state = MSD_ERROR;
-      } else {
-        sd_state = MSD_OK;
+      }
+
+      /* Configure SD Bus width */
+      if (sd_state == MSD_OK) {
+        /* Enable wide operation */
+        if (HAL_SD_ConfigWideBusOperation(&uSdHandle, SD_BUS_WIDE) != HAL_OK) {
+          sd_state = MSD_ERROR;
+        }
       }
     }
   }
@@ -341,29 +343,27 @@ uint8_t BSP_SD_DeInit(void)
 #if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION <= 0x02050000)
   uSdHandle.Instance = SD_INSTANCE;
 #else
-  if (BSP_SD_GetInstance() == MSD_ERROR) {
-    return MSD_ERROR;
-  }
-#endif
-
-  /* HAL SD deinitialization */
-  if (HAL_SD_DeInit(&uSdHandle) != HAL_OK) {
+  if (!BSP_SD_GetInstance()) {
     sd_state = MSD_ERROR;
-  }
-
-  /* Msp SD deinitialization */
-  BSP_SD_MspDeInit(&uSdHandle, NULL);
-
-
-  if (SD_detect_ll_gpio_pin != LL_GPIO_PIN_ALL) {
-    BSP_SD_Detect_MspDeInit(&uSdHandle, NULL);
-  }
-#if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
-  BSP_SD_Transceiver_MspDeInit(&uSdHandle, NULL);
+  } else
 #endif
+  {
+    /* HAL SD deinitialization */
+    if (HAL_SD_DeInit(&uSdHandle) != HAL_OK) {
+      sd_state = MSD_ERROR;
+    }
 
+    /* Msp SD deinitialization */
+    BSP_SD_MspDeInit(&uSdHandle, NULL);
 
-  return  sd_state;
+    if (SD_detect_ll_gpio_pin != LL_GPIO_PIN_ALL) {
+      BSP_SD_Detect_MspDeInit(&uSdHandle, NULL);
+    }
+#if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
+    BSP_SD_Transceiver_MspDeInit(&uSdHandle, NULL);
+#endif
+  }
+  return sd_state;
 }
 
 #if defined(USE_SD_TRANSCEIVER) && (USE_SD_TRANSCEIVER != 0U)
@@ -377,14 +377,16 @@ uint8_t BSP_SD_DeInit(void)
   */
 uint8_t BSP_SD_TransceiverPin(GPIO_TypeDef *enport, uint32_t enpin, GPIO_TypeDef *selport, uint32_t selpin)
 {
+  uint8_t sd_state = MSD_OK;
   if ((enport != 0) && (selport != 0)) {
     SD_trans_en_ll_gpio_pin = enpin;
     SD_trans_en_gpio_port = enport;
     SD_trans_sel_ll_gpio_pin = selpin;
     SD_trans_sel_gpio_port = selport;
-    return MSD_OK;
+  } else {
+    sd_state = MSD_ERROR;
   }
-  return MSD_ERROR;
+  return sd_state;
 }
 #endif
 
@@ -396,15 +398,17 @@ uint8_t BSP_SD_TransceiverPin(GPIO_TypeDef *enport, uint32_t enpin, GPIO_TypeDef
   */
 uint8_t BSP_SD_DetectPin(PinName p, uint32_t level)
 {
+  uint8_t sd_state = MSD_OK;
   GPIO_TypeDef *port = set_GPIO_Port_Clock(STM_PORT(p));
   uint32_t pin = STM_LL_GPIO_PIN(p);
   if (port != 0) {
     SD_detect_ll_gpio_pin = pin;
     SD_detect_gpio_port = port;
     SD_detect_level = level;
-    return MSD_OK;
+  } else {
+    sd_state = MSD_ERROR;
   }
-  return MSD_ERROR;
+  return sd_state;
 }
 
 /**
@@ -427,11 +431,7 @@ uint8_t BSP_SD_IsDetected(void)
   */
 uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint32_t ReadAddr, uint32_t NumOfBlocks, uint32_t Timeout)
 {
-  if (HAL_SD_ReadBlocks(&uSdHandle, (uint8_t *)pData, ReadAddr, NumOfBlocks, Timeout) != HAL_OK) {
-    return MSD_ERROR;
-  } else {
-    return MSD_OK;
-  }
+  return (HAL_SD_ReadBlocks(&uSdHandle, (uint8_t *)pData, ReadAddr, NumOfBlocks, Timeout) != HAL_OK) ? MSD_ERROR : MSD_OK;
 }
 
 /**
@@ -444,11 +444,7 @@ uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint32_t ReadAddr, uint32_t NumOfBloc
   */
 uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint32_t WriteAddr, uint32_t NumOfBlocks, uint32_t Timeout)
 {
-  if (HAL_SD_WriteBlocks(&uSdHandle, (uint8_t *)pData, WriteAddr, NumOfBlocks, Timeout) != HAL_OK) {
-    return MSD_ERROR;
-  } else {
-    return MSD_OK;
-  }
+  return (HAL_SD_WriteBlocks(&uSdHandle, (uint8_t *)pData, WriteAddr, NumOfBlocks, Timeout) != HAL_OK) ? MSD_ERROR : MSD_OK;
 }
 
 /**
@@ -459,11 +455,7 @@ uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint32_t WriteAddr, uint32_t NumOfBl
   */
 uint8_t BSP_SD_Erase(uint64_t StartAddr, uint64_t EndAddr)
 {
-  if (HAL_SD_Erase(&uSdHandle, StartAddr, EndAddr) != HAL_OK) {
-    return MSD_ERROR;
-  } else {
-    return MSD_OK;
-  }
+  return (HAL_SD_Erase(&uSdHandle, StartAddr, EndAddr) != HAL_OK) ? MSD_ERROR : MSD_OK;
 }
 
 /**
@@ -725,11 +717,12 @@ uint8_t BSP_SD_GetCardState(void)
 /**
   * @brief  Get SD information about specific SD card.
   * @param  CardInfo: Pointer to HAL_SD_CardInfoTypedef structure
+  * @retval boolean true if successful, false otherwise
   */
-void BSP_SD_GetCardInfo(HAL_SD_CardInfoTypeDef *CardInfo)
+bool BSP_SD_GetCardInfo(HAL_SD_CardInfoTypeDef *CardInfo)
 {
   /* Get SD card Information */
-  HAL_SD_GetCardInfo(&uSdHandle, CardInfo);
+  return (HAL_SD_GetCardInfo(&uSdHandle, CardInfo) == HAL_OK);
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -58,12 +58,12 @@ Please update the core or install previous library version."
 #define USE_SD_TRANSCEIVER        1
 #endif
 
-/*SD Card information structure */
+/* SD Card information structure */
 
 #define BSP_SD_CardInfo HAL_SD_CardInfoTypeDef
 /* For backward compatibility */
 #define SD_CardInfo BSP_SD_CardInfo
-/*SD status structure definition */
+/* SD status structure definition */
 #define MSD_OK                   ((uint8_t)0x00)
 #define MSD_ERROR                ((uint8_t)0x01)
 #define MSD_ERROR_SD_NOT_PRESENT ((uint8_t)0x02)
@@ -179,7 +179,7 @@ uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint32_t ReadAddr, uint32_t NumOfBloc
 uint8_t BSP_SD_WriteBlocks(uint32_t *pData, uint32_t WriteAddr, uint32_t NumOfBlocks, uint32_t Timeout);
 uint8_t BSP_SD_Erase(uint64_t StartAddr, uint64_t EndAddr);
 uint8_t BSP_SD_GetCardState(void);
-void    BSP_SD_GetCardInfo(HAL_SD_CardInfoTypeDef *CardInfo);
+bool    BSP_SD_GetCardInfo(HAL_SD_CardInfoTypeDef *CardInfo);
 uint8_t BSP_SD_IsDetected(void);
 
 /* These __weak function can be surcharged by application code in case the current settings (e.g. DMA stream)
