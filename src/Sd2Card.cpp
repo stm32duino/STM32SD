@@ -88,7 +88,7 @@ bool Sd2Card::deinit(void)
 
 uint8_t Sd2Card::type(void) const
 {
-  uint8_t cardType = SD_CARD_TYPE_UKN;
+  uint8_t cardType = SD_CARD_TYPE_UNK;
   switch (_SdCardInfo.CardType) {
     case CARD_SDSC:
       switch (_SdCardInfo.CardVersion) {
@@ -99,7 +99,7 @@ uint8_t Sd2Card::type(void) const
           cardType = SD_CARD_TYPE_SD2;
           break;
         default:
-          cardType = SD_CARD_TYPE_UKN;
+          cardType = SD_CARD_TYPE_UNK;
       }
       break;
     case CARD_SDHC_SDXC:
@@ -109,7 +109,7 @@ uint8_t Sd2Card::type(void) const
       cardType = SD_CARD_TYPE_SECURED;
       break;
     default:
-      cardType = SD_CARD_TYPE_UKN;
+      cardType = SD_CARD_TYPE_UNK;
   }
   return cardType;
 }
