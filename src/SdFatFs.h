@@ -42,6 +42,15 @@
 /* FatFs includes component */
 #include "FatFs.h"
 
+/* Filesystem type (FATFS.fs_type) */
+#define FAT_TYPE_FAT12 12 // FS_FAT12
+#define FAT_TYPE_FAT16 16 // FS_FAT16
+#define FAT_TYPE_FAT32 32 // FS_FAT32
+#if defined(FS_EXFAT)
+  #define FAT_TYPE_EXFAT 64 // FS_EXFAT
+#endif
+#define FAT_TYPE_UNK   0  // Unknown
+
 /* To match Arduino definition*/
 #define   FILE_WRITE  FA_WRITE
 #define   FILE_READ   FA_READ

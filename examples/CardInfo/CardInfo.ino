@@ -56,15 +56,26 @@ void setup() {
 
   // Now we will try to open the 'volume'/'partition' - it should be FAT16 or FAT32
   if (!fatFs.init()) {
-    Serial.println("Could not find FAT16/FAT32 partition.\nMake sure you've formatted the card");
+    Serial.println("Could not find FAT partition.\nMake sure you've formatted the card");
     return;
   }
 
   // print the type and size of the first FAT-type volume
   uint64_t volumesize;
-  Serial.print("\nVolume type is FAT");
-  Serial.println(fatFs.fatType(), DEC);
-  Serial.println();
+  Serial.print("\nVolume type is ");
+  uint8_t fatType = fatFs.fatType();
+#if defined(FAT_TYPE_EXFAT)
+  if (fatType == FAT_TYPE_EXFAT) {
+    Serial.println("exFAT");
+  } else
+#endif
+  {
+    if (fatType != FAT_TYPE_UNK) {
+      Serial.printf("FAT%u\n", fatFs.fatType());
+    } else {
+      Serial.println("unknown");
+    }
+  }
 
   volumesize = fatFs.blocksPerCluster();  // clusters are collections of blocks
   volumesize *= fatFs.clusterCount();     // we'll have a lot of clusters
