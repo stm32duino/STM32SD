@@ -157,11 +157,15 @@ class SDClass {
     {
       return _fatFs.fatType();
     }
+    /** \return Pointer to SD card object. */
+    Sd2Card *card()
+    {
+      return &_card;
+    }
 
   private:
     Sd2Card _card;
     SdFatFs _fatFs;
-
 };
 
 extern SDClass SD;
