@@ -162,7 +162,11 @@ class SDClass {
     {
       return &_card;
     }
-
+    /** \return Pointer to FatFs object. */
+    SdFatFs *fatFs()
+    {
+      return &_fatFs;
+    }
   private:
     Sd2Card _card;
     SdFatFs _fatFs;
