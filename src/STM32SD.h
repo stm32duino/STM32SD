@@ -153,6 +153,11 @@ class SDClass {
 
     friend class File;
 
+    uint8_t fatType()
+    {
+      return _fatFs.fatType();
+    }
+
   private:
     Sd2Card _card;
     SdFatFs _fatFs;

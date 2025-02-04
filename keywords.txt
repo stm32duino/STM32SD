@@ -31,6 +31,7 @@ setCMD	KEYWORD2
 setCKIN	KEYWORD2
 setCDIR	KEYWORD2
 setDxDIR	KEYWORD2
+fatType	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
