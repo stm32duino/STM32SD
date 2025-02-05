@@ -39,29 +39,30 @@
 
 bool SdFatFs::init(void)
 {
-
+  bool status = false;
   /*##-1- Link the SD disk I/O driver ########################################*/
   if (FATFS_LinkDriver(&SD_Driver, _SDPath) == 0) {
     /*##-2- Register the file system object to the FatFs module ##############*/
     if (f_mount(&_SDFatFs, (TCHAR const *)_SDPath, 1) == FR_OK) {
       /* FatFs Initialization done */
-      return true;
+      status = true;
     }
   }
-  return false;
+  return status;
 }
 
 bool SdFatFs::deinit(void)
 {
+  bool status = false;
   /*##-1- Unregister the file system object to the FatFs module ##############*/
   if (f_unmount((TCHAR const *)_SDPath) == FR_OK) {
     /*##-2- Unlink the SD disk I/O driver ####################################*/
     if (FATFS_UnLinkDriver(_SDPath) == 0) {
       /* FatFs deInitialization done */
-      return true;
+      status = true;
     }
   }
-  return false;
+  return status;
 }
 
 uint8_t SdFatFs::fatType(void)

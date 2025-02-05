@@ -40,7 +40,9 @@
 #include "bsp_sd.h"
 
 // card types to match Arduino definition
-#define SD_CARD_TYPE_UKN      0
+#define SD_CARD_TYPE_UNK      0
+// back compatibility
+#define SD_CARD_TYPE_UKN      SD_CARD_TYPE_UNK
 /** Standard capacity V1 SD card */
 #define SD_CARD_TYPE_SD1      1
 /** Standard capacity V2 SD card */
