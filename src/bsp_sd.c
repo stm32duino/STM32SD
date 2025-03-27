@@ -541,31 +541,31 @@ __weak void BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params)
     map++;
   }
 #else
-  HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_d0), STM_GPIO_PIN(SD_PinNames.pin_d0));
-  HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_d1), STM_GPIO_PIN(SD_PinNames.pin_d1));
-  HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_d2), STM_GPIO_PIN(SD_PinNames.pin_d2));
-  HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_d3), STM_GPIO_PIN(SD_PinNames.pin_d3));
-  HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_cmd), STM_GPIO_PIN(SD_PinNames.pin_cmd));
-  HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_ck), STM_GPIO_PIN(SD_PinNames.pin_ck));
+  HAL_GPIO_DeInit((GPIO_TypeDef *)get_GPIO_Port(STM_PORT(SD_PinNames.pin_d0)), STM_GPIO_PIN(SD_PinNames.pin_d0));
+  HAL_GPIO_DeInit((GPIO_TypeDef *)get_GPIO_Port(STM_PORT(SD_PinNames.pin_d1)), STM_GPIO_PIN(SD_PinNames.pin_d1));
+  HAL_GPIO_DeInit((GPIO_TypeDef *)get_GPIO_Port(STM_PORT(SD_PinNames.pin_d2)), STM_GPIO_PIN(SD_PinNames.pin_d2));
+  HAL_GPIO_DeInit((GPIO_TypeDef *)get_GPIO_Port(STM_PORT(SD_PinNames.pin_d3)), STM_GPIO_PIN(SD_PinNames.pin_d3));
+  HAL_GPIO_DeInit((GPIO_TypeDef *)get_GPIO_Port(STM_PORT(SD_PinNames.pin_cmd)), STM_GPIO_PIN(SD_PinNames.pin_cmd));
+  HAL_GPIO_DeInit((GPIO_TypeDef *)get_GPIO_Port(STM_PORT(SD_PinNames.pin_ck)), STM_GPIO_PIN(SD_PinNames.pin_ck));
 #if defined(SDMMC1) || defined(SDMMC2)
 #if !defined(SDMMC_CKIN_NA)
   if (SD_PinNames.pin_ckin != NC) {
-    HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_ckin), STM_GPIO_PIN(SD_PinNames.pin_ckin));
+    HAL_GPIO_DeInit((GPIO_TypeDef *)get_GPIO_Port(STM_PORT(SD_PinNames.pin_ckin)), STM_GPIO_PIN(SD_PinNames.pin_ckin));
   }
 #endif
 #if !defined(SDMMC_CDIR_NA)
   if (SD_PinNames.pin_cdir != NC) {
-    HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_cdir), STM_GPIO_PIN(SD_PinNames.pin_cdir));
+    HAL_GPIO_DeInit((GPIO_TypeDef *)get_GPIO_Port(STM_PORT(SD_PinNames.pin_cdir)), STM_GPIO_PIN(SD_PinNames.pin_cdir));
   }
 #endif
 #if !defined(SDMMC_D0DIR_NA)
   if (SD_PinNames.pin_d0dir != NC) {
-    HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_d0dir), STM_GPIO_PIN(SD_PinNames.pin_d0dir));
+    HAL_GPIO_DeInit((GPIO_TypeDef *)get_GPIO_Port(STM_PORT(SD_PinNames.pin_d0dir)), STM_GPIO_PIN(SD_PinNames.pin_d0dir));
   }
 #endif
 #if !defined(SDMMC_D123DIR_NA)
   if (SD_PinNames.pin_d123dir != NC) {
-    HAL_GPIO_DeInit((GPIO_TypeDef *)STM_PORT(SD_PinNames.pin_d123dir), STM_GPIO_PIN(SD_PinNames.pin_d123dir));
+    HAL_GPIO_DeInit((GPIO_TypeDef *)get_GPIO_Port(STM_PORT(SD_PinNames.pin_d123dir)), STM_GPIO_PIN(SD_PinNames.pin_d123dir));
   }
 #endif
 #endif /* SDMMC1 || SDMMC2 */
