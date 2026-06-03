@@ -47,7 +47,11 @@ extern "C" {
 #include "PinNames.h"
 #include "stm32_def.h"
 #include "variant.h"
+#if defined(STM32_CORE_VERSION) && (STM32_CORE_VERSION  <= 0x020C0000)
 #include "wiring_constants.h"
+#else
+#include "Common.h"
+#endif
 #if !defined(STM32_CORE_VERSION) || (STM32_CORE_VERSION  <= 0x01060100)
 #error "This library version required a STM32 core version > 1.6.1.\
 Please update the core or install previous library version."
