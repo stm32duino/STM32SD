@@ -150,8 +150,11 @@ File SDClass::open(const char *filepath, uint8_t mode /* = FA_READ */)
   file._dir.fs = 0;
 #endif
 
-  if ((mode == FILE_WRITE) && (!SD.exists(filepath))) {
-    mode = mode | FA_CREATE_ALWAYS;
+  if (mode == FILE_WRITE) {
+    /* Create the file if absent, open it untouched if present. Do not decide
+     * via exists(): a read error there would look like "absent" and
+     * FA_CREATE_ALWAYS would truncate an existing file. */
+    mode = mode | FA_OPEN_ALWAYS;
   }
 
   file._res = f_open(file._fil, filepath, mode);
